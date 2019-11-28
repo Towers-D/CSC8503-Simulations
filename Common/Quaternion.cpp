@@ -38,6 +38,10 @@ Quaternion::Quaternion(const Vector3& vector, float w) {
 	this->w = w;
 }
 
+Matrix3 Quaternion::ToMatrix3() const {
+	return Matrix3(*this);
+}
+
 Quaternion::Quaternion(const Matrix4 &m) {
 	w = sqrt(std::max(0.0f, (1.0f + m.array[0] + m.array[5] + m.array[10])))  * 0.5f;
 
