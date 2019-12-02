@@ -110,7 +110,8 @@ bool CollisionDetection::RaySphereIntersection(const Ray&r, const Transform& wor
 		return false;
 	float sNorm = sphereDist / sphereRadius;
 	sNorm = cos(DegreesToRadians(sNorm * 90));
-	collision.rayDistance = sphereProj - (sphereRadius * sNorm);
+	float offset = sqrt((sphereRadius * sphereRadius) - (sphereDist * sphereDist));
+	collision.rayDistance = sphereProj - offset;
 	collision.collidedAt = r.GetPosition() + (r.GetDirection() * collision.rayDistance);
 	return true;
 }
