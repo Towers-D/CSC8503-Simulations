@@ -43,7 +43,6 @@ void Transform::SetWorldPosition(const Vector3& worldPos) {
 	}
 	else {
 		localPosition = worldPos;
-
 		worldMatrix.SetPositionVector(worldPos);
 	}
 }

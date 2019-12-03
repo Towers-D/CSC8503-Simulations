@@ -195,6 +195,9 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
 
+	if (totalMass == 0.0f)
+		return;
+
 	transformA.SetWorldPosition(transformA.GetWorldPosition() - (p.normal * p.penetration * (physA->GetInverseMass() / totalMass)));
 	transformB.SetWorldPosition(transformB.GetWorldPosition() + (p.normal * p.penetration * (physB->GetInverseMass() / totalMass)));
 
@@ -208,6 +211,9 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Vector3 fullVelocityB = physB->GetLinearVelocity() + angVelocityB;
 
 	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
+
+	if (Vector3::Dot(contactVelocity, p.normal) > 0)
+		return;
 
 	float impulseForce = Vector3::Dot(contactVelocity, p.normal);
 
@@ -343,7 +349,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		Vector3 position = transform.GetLocalPosition();
 		Vector3 linearVel = object->GetLinearVelocity();
 		position += linearVel * dt;
-		//transform.SetLocalPosition(position);
+		transform.SetLocalPosition(position);
 		transform.SetWorldPosition(position);
 
 		//Linear Damping

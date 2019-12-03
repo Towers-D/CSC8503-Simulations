@@ -320,7 +320,8 @@ void TutorialGame::InitWorld() {
 	AddParkKeeperToWorld(Vector3(40, 5, 0));
 	AddCharacterToWorld(Vector3(45, 5, 0));
 
-	//AddFloorToWorld(Vector3(0, -2, 0));
+	BridgeConstraintTest();
+	AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 //From here on it's functions to add in objects to the world!
@@ -509,7 +510,6 @@ void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacin
 			AddSphereToWorld(position, radius, 1.0f);
 		}
 	}
-	AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing) {
@@ -528,7 +528,6 @@ void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing
 			}
 		}
 	}
-	AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims) {
@@ -538,18 +537,17 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 			AddCubeToWorld(position, cubeDims, 1.0f);
 		}
 	}
-	AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 void TutorialGame::BridgeConstraintTest() {
-	Vector3 cubeSize = Vector3(8, 8, 8);
+	Vector3 cubeSize = Vector3(2, 2, 2);
 
-	float	invCubeMass = 5;
-	int		numLinks	= 25;
-	float	maxDistance	= 30;
-	float	cubeDistance = 20;
+	float	invCubeMass = 5; //how heavy middle pieces are
+	int		numLinks	= 10;
+	float	maxDistance	= 22; //constraint distance
+	float	cubeDistance = 20; // distance between links
 
-	Vector3 startPos = Vector3(500, 1000, 500);
+	Vector3 startPos = Vector3(50, 50, 50);
 
 	GameObject* start = AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
 
