@@ -144,9 +144,8 @@ void PhysicsSystem::UpdateObjectAABBs() {
 	std::vector<GameObject*>::const_iterator last;
 	gameWorld.GetObjectIterators(first, last);
 
-	for (auto i = first; i != last; ++i) {
+	for (auto i = first; i != last; ++i)
 		(*i)->UpdateBroadphaseAABB();
-	}
 }
 
 /*

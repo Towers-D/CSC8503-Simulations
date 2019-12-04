@@ -63,9 +63,15 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+
+	delete player;
 }
 
 void TutorialGame::UpdateGame(float dt) {
+	timeRemaining -= dt;
+	float minutes = (timeRemaining / 60);
+	float seconds = (minutes - (int) minutes) * 60;
+	Debug::Print("Time Remaining: " + std::to_string((int) minutes) + ":" + std::to_string((int) seconds), Vector2(300, 650));
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
@@ -146,19 +152,19 @@ void TutorialGame::LockedObjectMovement() {
 	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
-		selectionObject->GetPhysicsObject()->AddForce(-rightAxis);
+		lockedObject->GetPhysicsObject()->AddForce(-rightAxis * 10);
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-		selectionObject->GetPhysicsObject()->AddForce(rightAxis);
+		lockedObject->GetPhysicsObject()->AddForce(rightAxis * 10);
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-		selectionObject->GetPhysicsObject()->AddForce(fwdAxis);
+		lockedObject->GetPhysicsObject()->AddForce(fwdAxis * 10);
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis);
+		lockedObject->GetPhysicsObject()->AddForce(-fwdAxis * 10);
 	}
 }
 
@@ -175,8 +181,8 @@ void  TutorialGame::LockedCameraMovement() {
 		Vector3 angles = q.ToEuler(); //nearly there now!
 
 		world->GetMainCamera()->SetPosition(camPos);
-		world->GetMainCamera()->SetPitch(angles.x);
-		world->GetMainCamera()->SetYaw(angles.y);
+		world->GetMainCamera()->SetPitch(angles.x -= Window::GetMouse()->GetRelativePosition().y);
+		world->GetMainCamera()->SetYaw(angles.y -= Window::GetMouse()->GetRelativePosition().x);
 	}
 }
 
@@ -314,7 +320,8 @@ void TutorialGame::InitWorld() {
 	physics->Clear();
 
 	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	AddGooseToWorld(Vector3(30, 2, 0));
+	player = AddGooseToWorld(Vector3(30, 2, 0));
+	LockCameraToObject(player);
 	AddAppleToWorld(Vector3(35, 2, 0));
 
 	AddParkKeeperToWorld(Vector3(40, 5, 0));

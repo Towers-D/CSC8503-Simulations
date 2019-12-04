@@ -51,10 +51,13 @@ namespace NCL {
 			PhysicsSystem*		physics;
 			GameWorld*			world;
 
+			GameObject* player;
+
 			bool useGravity;
 			bool inSelectionMode;
 
-			float		forceMagnitude;
+			float	forceMagnitude;
+			float	timeRemaining = 180;
 
 			GameObject* selectionObject = nullptr;
 
