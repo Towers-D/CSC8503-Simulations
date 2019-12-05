@@ -1,5 +1,6 @@
 #include "NavigationGrid.h"
 #include "../../Common/Assets.h"
+#include "Debug.h"
 
 #include <fstream>
 
@@ -21,6 +22,13 @@ NavigationGrid::NavigationGrid()	{
 	allNodes	= nullptr;
 }
 
+std::vector<Vector4> NavigationGrid::getNodePos() {
+	std::vector<Vector4> gridPoss;
+	for (int i = 0; i < gridHeight * gridWidth; ++i)
+		gridPoss.push_back(Vector4(allNodes[i].position.x, allNodes[i].position.y, allNodes[i].position.z, allNodes[i].type));
+	return gridPoss;
+}
+
 NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 	std::ifstream infile(Assets::DATADIR + filename);
 
@@ -36,7 +44,9 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 			char type = 0;
 			infile >> type;
 			n.type = type;
-			n.position = Vector3((float)(x * gridWidth), 0, (float)(y * gridHeight));
+			n.position = Vector3((float)(x * nodeSize), 0, (float)(y * nodeSize));
+			n.position.x -= 600;
+			n.position.z -= 100;
 		}
 	}
 	
@@ -76,11 +86,11 @@ NavigationGrid::~NavigationGrid()	{
 }
 
 bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, NavigationPath& outPath) {
-	int fromX = (from.x / nodeSize);
-	int fromZ = (from.z / nodeSize);
+	int fromX = ((from.x + 600)/ nodeSize);
+	int fromZ = ((from.z + 100)/ nodeSize);
 
-	int toX = (to.x / nodeSize);
-	int toZ = (to.z / nodeSize);
+	int toX = ((to.x + 600) / nodeSize);
+	int toZ = ((to.z + 100) / nodeSize);
 
 	if (fromX < 0 || fromX > gridWidth - 1 || fromZ < 0 || fromZ > gridHeight - 1)
 		return false;

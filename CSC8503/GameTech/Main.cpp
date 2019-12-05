@@ -48,14 +48,52 @@ void TestStateMachine() {
 	delete testMachine;
 }
 
-void TestNetworking() {
+class TestPacketReciever : public PacketReceiver {
+public:
+	TestPacketReciever(string name) {
+		this->name = name;
+	}
 
+	void ReceivePacket(int type, GamePacket* payload, int source) {
+		if (type == String_Message) {
+			StringPacket* realPacket = (StringPacket*)payload;
+			string msg = realPacket->GetStringFromData();
+			std::cout << name << " recieved message: " << msg << std::endl;
+		}
+	}
+protected:
+	string name;
+};
+
+void TestNetworking() {
+	NetworkBase::Initialise();
+	TestPacketReciever serverReceiver("Server");
+	TestPacketReciever clientreceiver("Client");
+
+	int port = NetworkBase::GetDefaultPort();
+	GameServer* server = new GameServer(port, 1);
+	GameClient* client = new GameClient();
+
+	server->RegisterPacketHandler(String_Message, &serverReceiver);
+	client->RegisterPacketHandler(String_Message, &clientreceiver);
+
+	bool canConnect = client->Connect(127, 0, 0, 1, port);
+
+	for (int i = 0; i < 100; ++i) {
+		server->SendGlobalPacket(StringPacket("Sever says hello!" + std::to_string(i)));
+		client->SendPacket(StringPacket("Client says hello!" + std::to_string(i)));
+		server->UpdateServer();
+		client->UpdateClient();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	NetworkBase::Destroy();
 }
 
 vector<Vector3> testNodes;
 
-void TestPathfinding() {
-	NavigationGrid grid("TestGrid1.txt");
+std::vector<Vector4> TestPathfinding() {
+	NavigationGrid grid("LakeGrid.txt");
 	NavigationPath outPath;
 
 	Vector3 startPos(80, 0, 10);
@@ -66,6 +104,7 @@ void TestPathfinding() {
 	Vector3 pos;
 	while (outPath.PopWaypoint(pos))
 		testNodes.push_back(pos);
+	return grid.getNodePos();
 }
 
 void DisplayPathfinding() {
@@ -78,7 +117,15 @@ void DisplayPathfinding() {
 	}
 }
 
-
+void DisplayNodes(std::vector<Vector4> grid) {
+	for (Vector4 node : grid) {
+		Vector3 pos = Vector3(node.x, node.y, node.z);
+		Vector4 colour = Vector4(1, 0, 0, 1);
+		if (node.w == 120)
+			colour = Vector4(0, 0, 1, 1);
+		Debug::DrawLine(pos, pos + Vector3(0, 20, 0), colour);
+	}
+}
 
 /*
 
@@ -101,7 +148,7 @@ int main() {
 
 	TestStateMachine();
 	TestNetworking();
-	TestPathfinding();
+	std::vector<Vector4> grid = TestPathfinding();
 	
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
@@ -121,7 +168,7 @@ int main() {
 		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NEXT)) {
 			w->ShowConsole(false);
 		}
-
+		DisplayNodes(grid);
 		DisplayPathfinding();
 
 		//w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));

@@ -36,6 +36,7 @@ namespace NCL {
 			void DebugObjectMovement();
 			void LockedObjectMovement();
 			void LockedCameraMovement();
+			void PlayerMovement();
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
@@ -46,7 +47,6 @@ namespace NCL {
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 
-
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
 			GameWorld*			world;
@@ -55,6 +55,7 @@ namespace NCL {
 
 			bool useGravity;
 			bool inSelectionMode;
+			bool playing = false;
 
 			float	forceMagnitude;
 			float	timeRemaining = 180;

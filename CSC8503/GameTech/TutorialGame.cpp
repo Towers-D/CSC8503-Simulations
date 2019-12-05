@@ -70,8 +70,8 @@ TutorialGame::~TutorialGame()	{
 void TutorialGame::UpdateGame(float dt) {
 	timeRemaining -= dt;
 	float minutes = (timeRemaining / 60);
-	float seconds = (minutes - (int) minutes) * 60;
-	Debug::Print("Time Remaining: " + std::to_string((int) minutes) + ":" + std::to_string((int) seconds), Vector2(300, 650));
+	int seconds = (minutes - (int) minutes) * 60;
+	Debug::Print("Time Remaining: " + std::to_string((int) minutes) + ":" + ((seconds < 10) ? "0" : "" ) + std::to_string(seconds), Vector2(300, 650));
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
@@ -108,6 +108,10 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F3)) {
+		playing = !playing;
+		std::cout << playing << std::endl;
+	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
 		useGravity = !useGravity; //Toggle gravity!
@@ -131,7 +135,9 @@ void TutorialGame::UpdateKeys() {
 		world->ShuffleObjects(false);
 	}
 
-	if (lockedObject) {
+	if (playing)
+		PlayerMovement();
+	else if (lockedObject) {
 		LockedObjectMovement();
 	}
 	else {
@@ -166,6 +172,34 @@ void TutorialGame::LockedObjectMovement() {
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
 		lockedObject->GetPhysicsObject()->AddForce(-fwdAxis * 10);
 	}
+}
+
+void TutorialGame::PlayerMovement() {
+	Matrix4 view = world->GetMainCamera()->BuildViewMatrix();
+	Matrix4 camWorld = view.Inverse();
+
+	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
+
+	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
+		player->GetPhysicsObject()->AddForce(-rightAxis * 10);
+	}
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
+		player->GetPhysicsObject()->AddForce(rightAxis * 10);
+	}
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
+		player->GetPhysicsObject()->AddForce(fwdAxis * 10);
+	}
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
+		player->GetPhysicsObject()->AddForce(-fwdAxis * 10);
+	}
+	
+	Quaternion q = Quaternion();
+	player->GetTransform().SetLocalOrientation(Matrix4::Rotation(world->GetMainCamera()->GetYaw() + 180, Vector3(0,1,0)));
 }
 
 void  TutorialGame::LockedCameraMovement() {
@@ -308,7 +342,7 @@ void TutorialGame::MoveSelectedObject() {
 
 void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetNearPlane(0.5f);
-	world->GetMainCamera()->SetFarPlane(500.0f);
+	world->GetMainCamera()->SetFarPlane(2000.0f);
 	world->GetMainCamera()->SetPitch(-15.0f);
 	world->GetMainCamera()->SetYaw(315.0f);
 	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
@@ -318,21 +352,26 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-
-	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	//AddParkKeeperToWorld(Vector3(40, 5, 0));
+	//AddCharacterToWorld(Vector3(45, 5, 0));
+	//BridgeConstraintTest();
+	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	player = AddGooseToWorld(Vector3(30, 2, 0));
-	LockCameraToObject(player);
 	AddAppleToWorld(Vector3(35, 2, 0));
 
-	AddParkKeeperToWorld(Vector3(40, 5, 0));
-	AddCharacterToWorld(Vector3(45, 5, 0));
+	GameObject* lake = AddCubeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
+	lake->GetRenderObject()->SetColour(Vector4(0, 0, 1, 0));
 
-	BridgeConstraintTest();
+	GameObject* Island = AddCubeToWorld(Vector3(-300, -1, 0), Vector3(50, 3, 20), 0);
+	Island->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
+	AddCubeToWorld(Vector3(-300, -2, 75), Vector3(200, 2, 25), 0);
+	AddCubeToWorld(Vector3(-300, -2, -75), Vector3(200, 2, 25), 0);
+	AddCubeToWorld(Vector3(-550, -2, 0), Vector3(50, 2, 100), 0);
+
 	AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 //From here on it's functions to add in objects to the world!
-
 /*
 
 A single function to add a large immoveable cube to the bottom of our world
