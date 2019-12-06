@@ -1,6 +1,7 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
+#include <functional>
 
 #include "PhysicsObject.h"
 #include "RenderObject.h"
@@ -63,8 +64,49 @@ namespace NCL {
 				return name;
 			}
 
+			bool isPlayer() const {
+				return player;
+			}
+
+			void swapPlayer() {
+				player = !player;
+				if (player == false)
+					lambda = NULL;
+				else {
+					lambda = [this](GameObject* g) {
+						if (this->collected != nullptr && g->GetName() == "Island") {
+							this->addScore(100);
+							this->collected = nullptr;
+						}
+					};
+				}
+			}
+
+			bool isCollectable() {
+				return collectable;
+			}
+
+			void swapCollectable() {
+				collectable = !collectable;
+				if (collectable == false)
+					lambda = NULL;
+				else {
+					lambda = [this](GameObject* g) {
+						if (g->isPlayer() && g->collected == nullptr) {
+							this->GetTransform().SetWorldPosition(g->GetTransform().GetWorldPosition() + Vector3(0, 5, 0));
+							this->GetPhysicsObject()->SetInverseMass(0);
+							g->collected = this;
+							this->GetTransform().SetParent(&g->GetTransform());
+							lambda = NULL;
+						}
+					};
+				}
+			}
+
 			virtual void OnCollisionBegin(GameObject* otherObject) {
-				//std::cout << "OnCollisionBegin event occured!\n";
+				if (lambda != NULL) {
+					lambda(otherObject);
+				}
 			}
 
 			virtual void OnCollisionEnd(GameObject* otherObject) {
@@ -75,6 +117,11 @@ namespace NCL {
 
 			void UpdateBroadphaseAABB();
 
+			GameObject* collected = nullptr;
+
+			void addScore(int score) { this->score += score; };
+			int getScore() {return score; };
+
 		protected:
 			Transform			transform;
 
@@ -84,6 +131,12 @@ namespace NCL {
 			NetworkObject*		networkObject;
 
 			bool	isActive;
+			bool	player = false;
+			bool	collectable = false;
+
+			int score = 0;
+
+			std::function<void(GameObject* g)> lambda = NULL;
 			string	name;
 
 			Vector3 broadphaseAABB;

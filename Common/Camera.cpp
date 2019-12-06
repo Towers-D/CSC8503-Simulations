@@ -26,26 +26,37 @@ void Camera::UpdateCamera(float dt) {
 	}
 
 	float frameSpeed = 200 * dt;
+	if (!playerCam) {
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
+			position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(0, 0, -1) * frameSpeed;
+		}
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+			position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(0, 0, -1) * frameSpeed;
+		}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
-		position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(0, 0, -1) * frameSpeed;
-	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
-		position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(0, 0, -1) * frameSpeed;
-	}
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+			position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0) * frameSpeed;
+		}
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+			position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0) * frameSpeed;
+		}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
-		position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0) * frameSpeed;
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
+			position.y += frameSpeed;
+		}
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SHIFT)) {
+			position.y -= frameSpeed;
+		}
 	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
-		position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0) * frameSpeed;
-	}
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
-		position.y += frameSpeed;
-	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SHIFT)) {
-		position.y -= frameSpeed;
+	else {
+		float ys = Window::GetMouse()->GetRelativePosition().x;
+		float ps = Window::GetMouse()->GetRelativePosition().y;
+		if (ps != 0)
+			position.y += ps;
+		if (ys > 0)
+			position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0);
+		else if ( ys < 0)
+			position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0);
 	}
 }
 

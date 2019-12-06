@@ -1,7 +1,13 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
+#include "../CSC8503Common/GameWorld.h"
+#include "../../Plugins/OpenGLRendering/OGLMesh.h"
+#include "../../Plugins/OpenGLRendering/OGLShader.h"
+#include "../../Plugins/OpenGLRendering/OGLTexture.h"
+#include "../../Common/TextureLoader.h"
 
+#include "../CSC8503Common/PositionConstraint.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -41,6 +47,7 @@ namespace NCL {
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddIslandToWorld();
 			//IT'S HAPPENING
 			GameObject* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
@@ -52,6 +59,7 @@ namespace NCL {
 			GameWorld*			world;
 
 			GameObject* player;
+			PositionConstraint* playColl = nullptr;
 
 			bool useGravity;
 			bool inSelectionMode;

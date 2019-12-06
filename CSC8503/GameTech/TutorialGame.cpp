@@ -1,11 +1,5 @@
 #include "TutorialGame.h"
-#include "../CSC8503Common/GameWorld.h"
-#include "../../Plugins/OpenGLRendering/OGLMesh.h"
-#include "../../Plugins/OpenGLRendering/OGLShader.h"
-#include "../../Plugins/OpenGLRendering/OGLTexture.h"
-#include "../../Common/TextureLoader.h"
 
-#include "../CSC8503Common/PositionConstraint.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -65,6 +59,7 @@ TutorialGame::~TutorialGame()	{
 	delete world;
 
 	delete player;
+	delete playColl;
 }
 
 void TutorialGame::UpdateGame(float dt) {
@@ -88,6 +83,7 @@ void TutorialGame::UpdateGame(float dt) {
 		Debug::Print("(G)ravity off", Vector2(10, 40));
 	}
 
+	Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2(10, 60));
 	SelectObject();
 	MoveSelectedObject();
 
@@ -110,7 +106,7 @@ void TutorialGame::UpdateKeys() {
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F3)) {
 		playing = !playing;
-		std::cout << playing << std::endl;
+		world->GetMainCamera()->swapCam();
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
@@ -175,30 +171,42 @@ void TutorialGame::LockedObjectMovement() {
 }
 
 void TutorialGame::PlayerMovement() {
-	Matrix4 view = world->GetMainCamera()->BuildViewMatrix();
-	Matrix4 camWorld = view.Inverse();
+	Vector3 pp = player->GetTransform().GetWorldPosition();
+	Vector3 cp = world->GetMainCamera()->GetPosition();
 
-	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
-
-	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
-		player->GetPhysicsObject()->AddForce(-rightAxis * 10);
-	}
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-		player->GetPhysicsObject()->AddForce(rightAxis * 10);
-	}
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-		player->GetPhysicsObject()->AddForce(fwdAxis * 10);
-	}
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-		player->GetPhysicsObject()->AddForce(-fwdAxis * 10);
-	}
+	//Keep Camera Certain Distance from Goose
+	float distance = pp.DistanceBetween(cp);
+	Vector3 dir = cp.GetDirection(pp);
+	dir *= Vector3(1, 0, 1);
+	if (distance > 30.5)
+		world->GetMainCamera()->SetPosition(world->GetMainCamera()->GetPosition() + dir * (distance - 30.5));
+	else if (distance < 29.5)
+		world->GetMainCamera()->SetPosition(world->GetMainCamera()->GetPosition() - dir * (29.5 - distance));
 	
-	Quaternion q = Quaternion();
+	//Camera always faces Goose
+	Matrix4 view = Matrix4::BuildViewMatrix(cp, pp, Vector3(0, 1, 0));
+	Matrix4 modelMat = view.Inverse();
+	Quaternion q(modelMat);
+	Vector3 angles = q.ToEuler();
+	world->GetMainCamera()->SetPitch(angles.x);
+	world->GetMainCamera()->SetYaw(angles.y);
+
+	//Goose Movement
+	Vector3 rightAxis = Vector3(modelMat.GetColumn(0)); //view is inverse of model!
+	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
+	float forceMul = 50;
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A))
+		player->GetPhysicsObject()->AddForce(-rightAxis * forceMul);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D))
+		player->GetPhysicsObject()->AddForce(rightAxis * forceMul);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W))
+		player->GetPhysicsObject()->AddForce(fwdAxis * forceMul);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S))
+		player->GetPhysicsObject()->AddForce(-fwdAxis * forceMul);
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE))
+		player->GetPhysicsObject()->AddForce(Vector3(0, 750, 0));
+
+	//Goose always faces away from camera
 	player->GetTransform().SetLocalOrientation(Matrix4::Rotation(world->GetMainCamera()->GetYaw() + 180, Vector3(0,1,0)));
 }
 
@@ -357,13 +365,15 @@ void TutorialGame::InitWorld() {
 	//BridgeConstraintTest();
 	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	player = AddGooseToWorld(Vector3(30, 2, 0));
-	AddAppleToWorld(Vector3(35, 2, 0));
+	player->swapPlayer();
+	GameObject* apple = AddAppleToWorld(Vector3(35, 2, 0));
+	apple->swapCollectable();
 
 	GameObject* lake = AddCubeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
 	lake->GetRenderObject()->SetColour(Vector4(0, 0, 1, 0));
 
-	GameObject* Island = AddCubeToWorld(Vector3(-300, -1, 0), Vector3(50, 3, 20), 0);
-	Island->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
+	GameObject* Island = AddIslandToWorld();
+
 	AddCubeToWorld(Vector3(-300, -2, 75), Vector3(200, 2, 25), 0);
 	AddCubeToWorld(Vector3(-300, -2, -75), Vector3(200, 2, 25), 0);
 	AddCubeToWorld(Vector3(-550, -2, 0), Vector3(50, 2, 100), 0);
@@ -441,6 +451,28 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	cube->GetPhysicsObject()->InitCubeInertia();
 
 	world->AddGameObject(cube);
+
+	return cube;
+}
+
+GameObject* TutorialGame::AddIslandToWorld() {
+	GameObject* cube = new GameObject("Island");
+
+	AABBVolume* volume = new AABBVolume(Vector3(50, 3, 20));
+
+	cube->SetBoundingVolume((CollisionVolume*)volume);
+
+	cube->GetTransform().SetWorldPosition(Vector3(-300, -2, 0));
+	cube->GetTransform().SetWorldScale(Vector3(50, 3, 20));
+
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
+
+	cube->GetPhysicsObject()->SetInverseMass(0);
+	cube->GetPhysicsObject()->InitCubeInertia();
+	cube->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
+	world->AddGameObject(cube);
+
 
 	return cube;
 }

@@ -61,6 +61,19 @@ namespace NCL {
 				return ((x*x) + (y*y) + (z*z));
 			}
 
+			//Returns distance between two points
+			float DistanceBetween(Vector3 rhs) const {
+				float xSqr = pow(rhs.x - x, 2);
+				float ySqr = pow(rhs.y - y, 2);
+				float zSqr = pow(rhs.z - z, 2);
+				return sqrt(xSqr + ySqr + zSqr);
+			}
+
+			//Returns normalised direction Vector
+			Vector3 GetDirection(Vector3 rhs) const {
+				return Vector3(rhs.x - x, rhs.y - y, rhs.z - z).Normalised();
+			}
+
 			constexpr float		GetMaxElement() const {
 				float v = x;
 				if (y > v) {
