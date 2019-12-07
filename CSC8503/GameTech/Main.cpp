@@ -171,6 +171,7 @@ int main() {
 		DisplayNodes(grid);
 		DisplayPathfinding();
 
+		//Test COmment
 		//w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 		w->SetTitle("FPS: " + std::to_string((int) ((1/dt))));
 		g->UpdateGame(dt);
