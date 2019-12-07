@@ -3,6 +3,7 @@
 #include "Debug.h"
 #include <list>
 #include <functional>
+#include "CollisionDetection.h"
 
 namespace NCL {
 	using namespace NCL::Maths;

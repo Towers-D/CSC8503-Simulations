@@ -70,16 +70,6 @@ namespace NCL {
 
 			void swapPlayer() {
 				player = !player;
-				if (player == false)
-					lambda = NULL;
-				else {
-					lambda = [this](GameObject* g) {
-						if (this->collected != nullptr && g->GetName() == "Island") {
-							this->addScore(100);
-							this->collected = nullptr;
-						}
-					};
-				}
 			}
 
 			bool isCollectable() {
@@ -96,7 +86,6 @@ namespace NCL {
 							this->GetTransform().SetWorldPosition(g->GetTransform().GetWorldPosition() + Vector3(0, 5, 0));
 							this->GetPhysicsObject()->SetInverseMass(0);
 							g->collected = this;
-							this->GetTransform().SetParent(&g->GetTransform());
 							lambda = NULL;
 						}
 					};

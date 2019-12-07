@@ -206,6 +206,15 @@ void TutorialGame::PlayerMovement() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE))
 		player->GetPhysicsObject()->AddForce(Vector3(0, 750, 0));
 
+	if (player->collected != nullptr && playColl == nullptr) {
+		playColl = new PositionConstraint(player, player->collected, 3);
+		world->AddConstraint(playColl);
+	}
+
+	if (playColl != nullptr && Window::GetKeyboard()->KeyPressed(KeyboardKeys::F)) {
+		world->RemoveConstraint(playColl);
+	}
+
 	//Goose always faces away from camera
 	player->GetTransform().SetLocalOrientation(Matrix4::Rotation(world->GetMainCamera()->GetYaw() + 180, Vector3(0,1,0)));
 }
