@@ -17,6 +17,7 @@ namespace NCL {
 			GameObject* objectB;
 
 			float distance;
+			
 		};
 	}
 }

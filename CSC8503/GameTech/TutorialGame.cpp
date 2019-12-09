@@ -171,6 +171,8 @@ void TutorialGame::LockedObjectMovement() {
 }
 
 void TutorialGame::PlayerMovement() {
+	player->addScore(Collectable::retrievePoints());
+	Collectable::setPoints(0);
 	Vector3 pp = player->GetTransform().GetWorldPosition();
 	Vector3 cp = world->GetMainCamera()->GetPosition();
 
@@ -206,13 +208,16 @@ void TutorialGame::PlayerMovement() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE))
 		player->GetPhysicsObject()->AddForce(Vector3(0, 750, 0));
 
-	if (player->collected != nullptr && playColl == nullptr) {
-		playColl = new PositionConstraint(player, player->collected, 3);
+	if (player->hasCollectable() && playColl == nullptr) {
+		playColl = new PositionConstraint(player, player->getCollected(), 3);
 		world->AddConstraint(playColl);
 	}
 
 	if (playColl != nullptr && Window::GetKeyboard()->KeyPressed(KeyboardKeys::F)) {
 		world->RemoveConstraint(playColl);
+		player->getCollected()->dropped();
+		player->removeCollectable();
+		playColl = nullptr;
 	}
 
 	//Goose always faces away from camera
@@ -370,13 +375,13 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 	//AddParkKeeperToWorld(Vector3(40, 5, 0));
-	//AddCharacterToWorld(Vector3(45, 5, 0));
+	AddCharacterToWorld(Vector3(45, 5, 0));
 	//BridgeConstraintTest();
 	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	player = AddGooseToWorld(Vector3(30, 2, 0));
-	player->swapPlayer();
-	GameObject* apple = AddAppleToWorld(Vector3(35, 2, 0));
-	apple->swapCollectable();
+	Collectable* apple = AddAppleToWorld(Vector3(35, 2, 0));
+	Collectable* bonusCube = AddBonusToWorld(Vector3(35, 2, 25), Vector3(0.5, 0.5, 0.5));
+
 
 	GameObject* lake = AddCubeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
 	lake->GetRenderObject()->SetColour(Vector4(0, 0, 1, 0));
@@ -486,12 +491,12 @@ GameObject* TutorialGame::AddIslandToWorld() {
 	return cube;
 }
 
-GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
+Player* TutorialGame::AddGooseToWorld(const Vector3& position)
 {
 	float size			= 1.0f;
 	float inverseMass	= 1.0f;
 
-	GameObject* goose = new GameObject("Dylan");
+	Player* goose = new Player("Dylan");
 
 
 	SphereVolume* volume = new SphereVolume(size);
@@ -571,8 +576,8 @@ GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 	return character;
 }
 
-GameObject* TutorialGame::AddAppleToWorld(const Vector3& position) {
-	GameObject* apple = new GameObject("Apple");
+Collectable* TutorialGame::AddAppleToWorld(const Vector3& position) {
+	Collectable* apple = new Collectable("Apple");
 
 	SphereVolume* volume = new SphereVolume(0.7f);
 	apple->SetBoundingVolume((CollisionVolume*)volume);
@@ -588,6 +593,27 @@ GameObject* TutorialGame::AddAppleToWorld(const Vector3& position) {
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+Collectable* TutorialGame::AddBonusToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
+	Collectable* bonus = new Collectable("Bonus Cube", true, 500);
+
+	AABBVolume* volume = new AABBVolume(dimensions);
+
+	bonus->SetBoundingVolume((CollisionVolume*)volume);
+
+	bonus->GetTransform().SetWorldPosition(position);
+	bonus->GetTransform().SetWorldScale(dimensions);
+
+	bonus->SetRenderObject(new RenderObject(&bonus->GetTransform(), cubeMesh, basicTex, basicShader));
+	bonus->SetPhysicsObject(new PhysicsObject(&bonus->GetTransform(), bonus->GetBoundingVolume()));
+
+	bonus->GetPhysicsObject()->SetInverseMass(inverseMass);
+	bonus->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(bonus);
+
+	return bonus;
 }
 
 void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius) {

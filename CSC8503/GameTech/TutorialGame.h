@@ -8,7 +8,8 @@
 #include "../../Common/TextureLoader.h"
 
 #include "../CSC8503Common/PositionConstraint.h"
-
+#include "../CSC8503Common/Player.h"
+#include "../CSC8503Common/Collectable.h"
 namespace NCL {
 	namespace CSC8503 {
 		class TutorialGame		{
@@ -49,16 +50,17 @@ namespace NCL {
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddIslandToWorld();
 			//IT'S HAPPENING
-			GameObject* AddGooseToWorld(const Vector3& position);
+			Player* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
 			GameObject* AddCharacterToWorld(const Vector3& position);
-			GameObject* AddAppleToWorld(const Vector3& position);
+			Collectable* AddAppleToWorld(const Vector3& position);
+			Collectable* AddBonusToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
 			GameWorld*			world;
 
-			GameObject* player;
+			Player* player;
 			PositionConstraint* playColl = nullptr;
 
 			bool useGravity;

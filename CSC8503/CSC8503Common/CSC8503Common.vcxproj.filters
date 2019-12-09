@@ -123,6 +123,10 @@
     <ClInclude Include="Debug.h">
       <Filter>Other</Filter>
     </ClInclude>
+    <ClInclude Include="Collectable.h">
+      <Filter>Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp">
@@ -200,5 +204,9 @@
     <ClCompile Include="Transform.cpp">
       <Filter>Other</Filter>
     </ClCompile>
+    <ClCompile Include="Collectable.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp" />
   </ItemGroup>
 </Project>

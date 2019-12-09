@@ -137,6 +137,7 @@
     <ClInclude Include="BoundingOOBB.h" />
     <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="BoundingVolume.h" />
+    <ClInclude Include="Collectable.h" />
     <ClInclude Include="NavigationGrid.h" />
     <ClInclude Include="NavigationMap.h" />
     <ClInclude Include="NavigationMesh.h" />
@@ -144,6 +145,7 @@
     <ClInclude Include="NetworkObject.h" />
     <ClInclude Include="NetworkState.h" />
     <ClInclude Include="OBBVolume.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="SphereVolume.h" />
     <ClInclude Include="CollisionVolume.h" />
     <ClInclude Include="CollisionDetection.h" />
@@ -172,6 +174,7 @@
     <ClCompile Include="BoundingOOBB.cpp" />
     <ClCompile Include="BoundingSphere.cpp" />
     <ClCompile Include="BoundingVolume.cpp" />
+    <ClCompile Include="Collectable.cpp" />
     <ClCompile Include="CollisionDetection.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="GameClient.cpp" />
@@ -185,6 +188,7 @@
     <ClCompile Include="NetworkState.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />
     <ClCompile Include="PhysicsSystem.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="PositionConstraint.cpp" />
     <ClCompile Include="PushdownMachine.cpp" />
     <ClCompile Include="PushdownState.cpp" />

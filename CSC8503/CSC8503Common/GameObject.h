@@ -9,6 +9,8 @@
 
 #include <vector>
 
+//#include "Player.h"
+
 using std::vector;
 
 namespace NCL {
@@ -63,35 +65,6 @@ namespace NCL {
 			const string& GetName() const {
 				return name;
 			}
-
-			bool isPlayer() const {
-				return player;
-			}
-
-			void swapPlayer() {
-				player = !player;
-			}
-
-			bool isCollectable() {
-				return collectable;
-			}
-
-			void swapCollectable() {
-				collectable = !collectable;
-				if (collectable == false)
-					lambda = NULL;
-				else {
-					lambda = [this](GameObject* g) {
-						if (g->isPlayer() && g->collected == nullptr) {
-							this->GetTransform().SetWorldPosition(g->GetTransform().GetWorldPosition() + Vector3(0, 5, 0));
-							this->GetPhysicsObject()->SetInverseMass(0);
-							g->collected = this;
-							lambda = NULL;
-						}
-					};
-				}
-			}
-
 			virtual void OnCollisionBegin(GameObject* otherObject) {
 				if (lambda != NULL) {
 					lambda(otherObject);
@@ -106,11 +79,8 @@ namespace NCL {
 
 			void UpdateBroadphaseAABB();
 
-			GameObject* collected = nullptr;
 
-			void addScore(int score) { this->score += score; };
-			int getScore() {return score; };
-
+			bool isBasic() { return basicObject; };
 		protected:
 			Transform			transform;
 
@@ -120,11 +90,8 @@ namespace NCL {
 			NetworkObject*		networkObject;
 
 			bool	isActive;
-			bool	player = false;
-			bool	collectable = false;
-
-			int score = 0;
-
+			bool	basicObject = true;
+			
 			std::function<void(GameObject* g)> lambda = NULL;
 			string	name;
 
