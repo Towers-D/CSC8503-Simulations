@@ -80,6 +80,7 @@ namespace NCL {
 			OGLMesh*	cubeMesh	= nullptr;
 			OGLMesh*	sphereMesh	= nullptr;
 			OGLTexture* basicTex	= nullptr;
+			OGLTexture* blankTex = nullptr;
 			OGLShader*	basicShader = nullptr;
 
 			//Coursework Meshes

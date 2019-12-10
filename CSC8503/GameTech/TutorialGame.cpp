@@ -41,6 +41,7 @@ void TutorialGame::InitialiseAssets() {
 	loadFunc("Apple.msh"	 , &appleMesh);
 
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
+	blankTex = (OGLTexture*)TextureLoader::LoadAPITexture("Blank.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
 	InitCamera();
@@ -632,12 +633,13 @@ Collectable* TutorialGame::AddBonusToWorld(const Vector3& position, Vector3 dime
 	bonus->GetTransform().SetWorldPosition(position);
 	bonus->GetTransform().SetWorldScale(dimensions);
 
-	bonus->SetRenderObject(new RenderObject(&bonus->GetTransform(), cubeMesh, basicTex, basicShader));
+	bonus->SetRenderObject(new RenderObject(&bonus->GetTransform(), cubeMesh, blankTex, basicShader));
 	bonus->SetPhysicsObject(new PhysicsObject(&bonus->GetTransform(), bonus->GetBoundingVolume()));
 
 	bonus->GetPhysicsObject()->SetInverseMass(inverseMass);
 	bonus->GetPhysicsObject()->InitCubeInertia();
 
+	bonus->GetRenderObject()->SetColour(Vector4(0.82f, 0.7f, 0.23f, 1));
 	world->AddGameObject(bonus);
 
 	return bonus;
