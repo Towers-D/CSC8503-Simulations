@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "Collectable.h"
+#include <functional>
 
 namespace NCL {
 	namespace CSC8503 {
@@ -15,9 +16,14 @@ namespace NCL {
 
 			int getScore() {return score;};
 			void addScore(int s) { score += s; };
+
+			bool isSwimming() { return swimming; };
+			void swapMoveType() { swimming = !swimming; };
 		private:
+			
 			Collectable* collectedItem = nullptr;
 			int score = 0;
+			bool swimming = false;
 		};
 	}
 }

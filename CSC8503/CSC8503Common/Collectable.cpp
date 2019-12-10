@@ -13,11 +13,11 @@ Collectable::Collectable(string name, bool bonus, int points) {
 }
 
 void Collectable::dropped() {
-	lambda = [this](GameObject* g) {
+	beginFunction = [this](GameObject* g) {
 		if (g->GetName() == "Island") {
 			this->swapCollectable();
 			Collectable::setPoints(this->getPoints());
-			lambda = NULL;
+			beginFunction = NULL;
 		}
 	};
 }

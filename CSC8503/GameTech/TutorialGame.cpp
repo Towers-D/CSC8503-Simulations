@@ -197,15 +197,17 @@ void TutorialGame::PlayerMovement() {
 	//Goose Movement
 	Vector3 rightAxis = Vector3(modelMat.GetColumn(0)); //view is inverse of model!
 	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
-	float forceMul = 50;
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A))
-		player->GetPhysicsObject()->AddForce(-rightAxis * forceMul);
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D))
-		player->GetPhysicsObject()->AddForce(rightAxis * forceMul);
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W))
-		player->GetPhysicsObject()->AddForce(fwdAxis * forceMul);
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S))
-		player->GetPhysicsObject()->AddForce(-fwdAxis * forceMul);
+	float forceMul = player->isSwimming() ? 200: 50;
+	if (!player->isSwimming() || timeRemaining - floor(timeRemaining) < 0.2f) {
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A))
+			player->GetPhysicsObject()->AddForce(-rightAxis * forceMul);
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D))
+			player->GetPhysicsObject()->AddForce(rightAxis * forceMul);
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W))
+			player->GetPhysicsObject()->AddForce(fwdAxis * forceMul);
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S))
+			player->GetPhysicsObject()->AddForce(-fwdAxis * forceMul);
+	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE))
 		player->GetPhysicsObject()->AddForce(Vector3(0, 750, 0));
 
@@ -386,8 +388,8 @@ void TutorialGame::InitWorld() {
 	Collectable* bonusCube = AddBonusToWorld(Vector3(35, 2, 25), Vector3(0.5, 0.5, 0.5));
 
 
-	GameObject* lake = AddCubeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
-	lake->GetRenderObject()->SetColour(Vector4(0, 0, 1, 0));
+	GameObject* lake = AddLakeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
+	
 
 	GameObject* Island = AddIslandToWorld();
 
@@ -469,6 +471,27 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 
 	world->AddGameObject(cube);
 
+	return cube;
+}
+
+GameObject* TutorialGame::AddLakeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
+	GameObject* cube = new GameObject("Lake");
+
+	AABBVolume* volume = new AABBVolume(dimensions);
+
+	cube->SetBoundingVolume((CollisionVolume*)volume);
+
+	cube->GetTransform().SetWorldPosition(position);
+	cube->GetTransform().SetWorldScale(dimensions);
+
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
+
+	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
+	cube->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(cube);
+	cube->GetRenderObject()->SetColour(Vector4(0, 0, 1, 0));
 	return cube;
 }
 

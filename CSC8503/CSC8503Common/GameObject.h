@@ -9,8 +9,6 @@
 
 #include <vector>
 
-//#include "Player.h"
-
 using std::vector;
 
 namespace NCL {
@@ -66,13 +64,15 @@ namespace NCL {
 				return name;
 			}
 			virtual void OnCollisionBegin(GameObject* otherObject) {
-				if (lambda != NULL) {
-					lambda(otherObject);
+				if (beginFunction != NULL) {
+					beginFunction(otherObject);
 				}
 			}
 
 			virtual void OnCollisionEnd(GameObject* otherObject) {
-				//std::cout << "OnCollisionEnd event occured!\n";
+				if (endFunction != NULL) {
+					endFunction(otherObject);
+				}
 			}
 
 			bool GetBroadphaseAABB(Vector3&outsize) const;
@@ -92,7 +92,9 @@ namespace NCL {
 			bool	isActive;
 			bool	basicObject = true;
 			
-			std::function<void(GameObject* g)> lambda = NULL;
+			std::function<void(GameObject* g)> beginFunction = NULL;
+			std::function<void(GameObject* g)> endFunction = NULL;
+
 			string	name;
 
 			Vector3 broadphaseAABB;
