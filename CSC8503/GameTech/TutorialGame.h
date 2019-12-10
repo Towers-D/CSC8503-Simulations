@@ -7,9 +7,12 @@
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Common/TextureLoader.h"
 
+#include "../CSC8503Common/NavigationGrid.h"
 #include "../CSC8503Common/PositionConstraint.h"
 #include "../CSC8503Common/Player.h"
 #include "../CSC8503Common/Collectable.h"
+#include "../CSC8503Common/Enemy.h"
+
 namespace NCL {
 	namespace CSC8503 {
 		class TutorialGame		{
@@ -52,7 +55,7 @@ namespace NCL {
 			//IT'S HAPPENING
 			Player* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
-			GameObject* AddCharacterToWorld(const Vector3& position);
+			Enemy* AddCharacterToWorld(const Vector3& position);
 			Collectable* AddAppleToWorld(const Vector3& position);
 			Collectable* AddBonusToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 
@@ -61,6 +64,7 @@ namespace NCL {
 			GameWorld*			world;
 
 			Player* player;
+			Enemy* chaser;
 			PositionConstraint* playColl = nullptr;
 
 			bool useGravity;

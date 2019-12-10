@@ -69,6 +69,14 @@ namespace NCL {
 				return sqrt(xSqr + ySqr + zSqr);
 			}
 
+			//Returns distance between two points, ignoring the y Co-ordinate
+			float DistanceBetweenNoY(Vector3 rhs) const {
+				float xSqr = pow(rhs.x - x, 2);
+				float zSqr = pow(rhs.z - z, 2);
+				return sqrt(xSqr + zSqr);
+			}
+
+
 			//Returns normalised direction Vector
 			Vector3 GetDirection(Vector3 rhs) const {
 				return Vector3(rhs.x - x, rhs.y - y, rhs.z - z).Normalised();

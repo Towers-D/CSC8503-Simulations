@@ -37,6 +37,8 @@ namespace NCL {
 
 			bool FindPath(const Vector3& from, const Vector3& to, NavigationPath& outPath) override;
 			std::vector<Vector4> getNodePos();
+			Vector3 getClosestNodePos(Vector3 pos);
+			int getClosestNodeType(Vector3 pos);
 				
 		protected:
 			bool		NodeInList(GridNode* n, std::vector<GridNode*>& list) const;

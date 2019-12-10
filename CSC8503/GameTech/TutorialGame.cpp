@@ -83,6 +83,7 @@ void TutorialGame::UpdateGame(float dt) {
 		Debug::Print("(G)ravity off", Vector2(10, 40));
 	}
 
+	chaser->UpdateState();
 	Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2(10, 60));
 	SelectObject();
 	MoveSelectedObject();
@@ -374,11 +375,13 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
+	player = AddGooseToWorld(Vector3(30, 2, 0));
 	//AddParkKeeperToWorld(Vector3(40, 5, 0));
-	AddCharacterToWorld(Vector3(45, 5, 0));
+	chaser = AddCharacterToWorld(Vector3(45, 5, 0));
+	chaser->setUpStateMachine();
 	//BridgeConstraintTest();
 	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	player = AddGooseToWorld(Vector3(30, 2, 0));
+	
 	Collectable* apple = AddAppleToWorld(Vector3(35, 2, 0));
 	Collectable* bonusCube = AddBonusToWorld(Vector3(35, 2, 25), Vector3(0.5, 0.5, 0.5));
 
@@ -540,7 +543,7 @@ GameObject* TutorialGame::AddParkKeeperToWorld(const Vector3& position)
 	return keeper;
 }
 
-GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
+Enemy* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 	float meshSize = 4.0f;
 	float inverseMass = 0.5f;
 
@@ -554,7 +557,7 @@ GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 		minVal.y = min(minVal.y, i.y);
 	}
 
-	GameObject* character = new GameObject("William");
+	Enemy* character = new Enemy("William", player);
 
 	float r = rand() / (float)RAND_MAX;
 
@@ -564,6 +567,7 @@ GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 
 	character->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
 	character->GetTransform().SetWorldPosition(position);
+	character->setStartingPosition(position);
 
 	character->SetRenderObject(new RenderObject(&character->GetTransform(), r > 0.5f ? charA : charB, nullptr, basicShader));
 	character->SetPhysicsObject(new PhysicsObject(&character->GetTransform(), character->GetBoundingVolume()));

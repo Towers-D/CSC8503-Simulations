@@ -86,11 +86,11 @@ NavigationGrid::~NavigationGrid()	{
 }
 
 bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, NavigationPath& outPath) {
-	int fromX = ((from.x + 600)/ nodeSize);
-	int fromZ = ((from.z + 100)/ nodeSize);
+	int fromX = ((from.x + 600.5)/ nodeSize);
+	int fromZ = ((from.z + 100.5)/ nodeSize);
 
-	int toX = ((to.x + 600) / nodeSize);
-	int toZ = ((to.z + 100) / nodeSize);
+	int toX = ((to.x + 600.5) / nodeSize);
+	int toZ = ((to.z + 100.5) / nodeSize);
 
 	if (fromX < 0 || fromX > gridWidth - 1 || fromZ < 0 || fromZ > gridHeight - 1)
 		return false;
@@ -148,6 +148,18 @@ bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, Navigation
 		}
 	}
 	return false;
+}
+
+Vector3 NavigationGrid::getClosestNodePos(Vector3 pos) {
+	int X = ((pos.x + 600.5) / nodeSize);
+	int Z = ((pos.z + 100.5) / nodeSize);
+	return allNodes[Z * gridWidth + X].position;
+}
+
+int NavigationGrid::getClosestNodeType(Vector3 pos) {
+	int X = ((pos.x + 600) / nodeSize);
+	int Z = ((pos.z + 100) / nodeSize);
+	return allNodes[Z * gridWidth + X].type;
 }
 
 bool NavigationGrid::NodeInList(GridNode* n, std::vector<GridNode*>& list) const {
