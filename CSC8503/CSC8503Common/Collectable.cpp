@@ -21,3 +21,7 @@ void Collectable::dropped() {
 		}
 	};
 }
+
+void Collectable::returnToStart() {
+	this->GetTransform().SetWorldPosition(startPos);
+}

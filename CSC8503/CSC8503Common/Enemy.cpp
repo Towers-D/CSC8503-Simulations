@@ -9,6 +9,20 @@ NavigationGrid Enemy::lake = NavigationGrid("LakeGrid.txt");
 Enemy::Enemy(string name, Player* player) {
 	this->name = name;
 	playerPointer = player;
+
+	beginFunction = [this](GameObject* g) {
+		if (Player * p = dynamic_cast<Player*>(g)) {
+			if (p->hasCollectable()) {
+				if (p->getCollected()->isBonus()) {
+					p->getCollected()->returnToStart();
+					p->getCollected()->GetPhysicsObject()->ClearForces();
+					p->getCollected()->GetPhysicsObject()->SetAngularVelocity(Vector3(0,0,0));
+					p->getCollected()->GetPhysicsObject()->SetLinearVelocity(Vector3(0,0,0));
+					p->removeCollectable();
+				}
+			}
+		}
+	};
 }
 
 Enemy::~Enemy() {

@@ -22,7 +22,7 @@
 
 			Enemy(string name, Player* player);
 			~Enemy();
-			void setStartingPosition(Vector3 v) { startPos = v; };
+			
 			State getState() { return currentState; };
 			
 			void genPath(Vector3 endPos);
@@ -32,7 +32,6 @@
 		private:
 			State currentState = IDLE;
 			NavigationPath path;
-			Vector3 startPos;
 			
 			void lookAt(Vector3 pos);
 			StateMachine* machine = new StateMachine();

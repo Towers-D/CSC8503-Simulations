@@ -217,10 +217,12 @@ void TutorialGame::PlayerMovement() {
 		world->AddConstraint(playColl);
 	}
 
-	if (playColl != nullptr && Window::GetKeyboard()->KeyPressed(KeyboardKeys::F)) {
+	if (playColl != nullptr && (!player->hasCollectable() || Window::GetKeyboard()->KeyPressed(KeyboardKeys::F))) {
 		world->RemoveConstraint(playColl);
-		player->getCollected()->dropped();
-		player->removeCollectable();
+		if (player->hasCollectable()) {
+			player->getCollected()->dropped();
+			player->removeCollectable();
+		}
 		playColl = nullptr;
 	}
 
@@ -625,7 +627,7 @@ Collectable* TutorialGame::AddAppleToWorld(const Vector3& position) {
 
 Collectable* TutorialGame::AddBonusToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
 	Collectable* bonus = new Collectable("Bonus Cube", true, 500);
-
+	bonus->setStartingPosition(position);
 	AABBVolume* volume = new AABBVolume(dimensions);
 
 	bonus->SetBoundingVolume((CollisionVolume*)volume);

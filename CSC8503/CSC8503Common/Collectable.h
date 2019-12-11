@@ -15,6 +15,8 @@ namespace NCL {
 			void swapCollectable() { collectable = false; };
 			bool isCollectable() { return collectable; };
 
+			void returnToStart();
+
 			static void setPoints(int i) { pointsToCollect = i; };
 			static int retrievePoints() { return pointsToCollect; };
 		private:

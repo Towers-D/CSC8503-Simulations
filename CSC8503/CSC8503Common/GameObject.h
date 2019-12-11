@@ -81,6 +81,8 @@ namespace NCL {
 
 
 			bool isBasic() { return basicObject; };
+			void setStartingPosition(Vector3 v) { startPos = v; };
+
 		protected:
 			Transform			transform;
 
@@ -91,6 +93,7 @@ namespace NCL {
 
 			bool	isActive;
 			bool	basicObject = true;
+			Vector3 startPos;
 			
 			std::function<void(GameObject* g)> beginFunction = NULL;
 			std::function<void(GameObject* g)> endFunction = NULL;
