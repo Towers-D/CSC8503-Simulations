@@ -68,7 +68,7 @@ void TutorialGame::UpdateGame(float dt) {
 	timeRemaining -= dt;
 	float minutes = (timeRemaining / 60);
 	int seconds = (minutes - (int) minutes) * 60;
-	Debug::Print("Time Remaining: " + std::to_string((int) minutes) + ":" + ((seconds < 10) ? "0" : "" ) + std::to_string(seconds), Vector2(300, 650));
+	Debug::Print("Time Remaining: " + std::to_string((int) minutes) + ":" + ((seconds < 10) ? "0" : "" ) + std::to_string(seconds), Vector2(300, 650), Vector4(1,0.5,0,1));
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
@@ -255,38 +255,32 @@ void  TutorialGame::LockedCameraMovement() {
 void TutorialGame::DebugObjectMovement() {
 //If we've selected an object, we can manipulate it with some key presses
 	if (inSelectionMode && selectionObject) {
-		//Twist the selected object!
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
+			selectionObject->GetTransform().SetWorldPosition(selectionObject->GetTransform().GetWorldPosition() - Vector3(0, 0, 1));
+		}
+
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(-10, 0, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(10, 0, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM7)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, 10, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM8)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, -10, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(10, 0, 0));
+			selectionObject->GetTransform().SetWorldPosition(selectionObject->GetTransform().GetWorldPosition() + Vector3(0, 0, 1));
 		}
 
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, -10));
+			selectionObject->GetTransform().SetWorldPosition(selectionObject->GetTransform().GetWorldPosition() - Vector3(1, 0, 0));
 		}
 
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, 10));
+			selectionObject->GetTransform().SetWorldPosition(selectionObject->GetTransform().GetWorldPosition() + Vector3(1, 0, 0));
 		}
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::PLUS)) {
+			selectionObject->GetTransform().SetWorldPosition(selectionObject->GetTransform().GetWorldPosition() + Vector3(0, 1, 0));
+		}
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::MINUS)) {
+			selectionObject->GetTransform().SetWorldPosition(selectionObject->GetTransform().GetWorldPosition() - Vector3(0, 1, 0));
+		}
+		Debug::Print("Object: " + selectionObject->GetName(), Vector2(50, 500), Vector4(0, 1, 0, 1));
 
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM5)) {
-			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, -10, 0));
-		}
+		Vector3 position = selectionObject->GetTransform().GetWorldPosition();
+		string posString = "Position: (" + std::to_string(round(position.x * 100)/100).substr(0, 6) + ", " + std::to_string(round(position.y*100)/100).substr(0, 6) + ", " + std::to_string(round(position.z*100)/100).substr(0, 6) + ")";
+		Debug::Print(posString, Vector2(50, 475), Vector4(0, 1, 0, 1));
 	}
 }
 
@@ -395,15 +389,34 @@ void TutorialGame::InitWorld() {
 	GameObject* lake = AddLakeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
 	GameObject* Island = AddIslandToWorld();
 
-	GameObject* OBB = AddOBBCubeToWorld(Vector3(-10, 0, -10), Vector3(5, 5, 15), 0);
-	Quaternion q = Matrix4::Rotation(30, Vector3(1, 0, 0));
-	OBB->GetTransform().SetLocalOrientation(q);
-
 	AddCubeToWorld(Vector3(-300, -2, 75), Vector3(200, 2, 25), 0);
 	AddCubeToWorld(Vector3(-300, -2, -75), Vector3(200, 2, 25), 0);
 	AddCubeToWorld(Vector3(-550, -2, 0), Vector3(50, 2, 100), 0);
-
+	InitBridge();
 	AddFloorToWorld(Vector3(0, -2, 0));
+}
+
+void TutorialGame::InitBridge() {
+	Quaternion q1 = Matrix4::Rotation(30, Vector3(1, 0, 0));
+	Quaternion q2 = Matrix4::Rotation(-30, Vector3(1, 0, 0));
+
+	//Bridge Ramps
+	AddOBBCubeToWorld(Vector3(-135, 0, 40), Vector3(5, 5, 15), q1, 0);
+	AddOBBCubeToWorld(Vector3(-135, 0, -40), Vector3(5, 5, 15), q2, 0);
+	
+	//Bridge Flateners
+	AddCubeToWorld(Vector3(-135, 6.85, -24.5), Vector3(5, 5, 5), 0);
+	AddCubeToWorld(Vector3(-135, 6.85, 24.5), Vector3(5, 5, 5), 0);
+
+	//Bridge Coverings
+	AddCubeToWorld(Vector3(-129, 3, -24.5), Vector3(1, 10, 5), 0);
+	AddCubeToWorld(Vector3(-141, 3, -24.5), Vector3(1, 10, 5), 0);
+	AddCubeToWorld(Vector3(-129, 3, 24.5), Vector3(1, 10, 5), 0);
+	AddCubeToWorld(Vector3(-141, 3, 24.5), Vector3(1, 10, 5), 0);
+
+	//Bridge Railings
+	AddCubeToWorld(Vector3(-129, 10, 0), Vector3(1, 3, 19.5), 0);
+	AddCubeToWorld(Vector3(-141, 10, 0), Vector3(1, 3, 19.5), 0);
 }
 
 //From here on it's functions to add in objects to the world!
@@ -480,7 +493,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	return cube;
 }
 
-GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
+GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, Quaternion q,  float inverseMass) {
 	GameObject* cube = new GameObject("cube");
 
 	OBBVolume* volume = new OBBVolume(dimensions);
@@ -495,7 +508,7 @@ GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dim
 
 	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
 	cube->GetPhysicsObject()->InitCubeInertia();
-
+	cube->GetTransform().SetLocalOrientation(q);
 	world->AddGameObject(cube);
 
 	return cube;
