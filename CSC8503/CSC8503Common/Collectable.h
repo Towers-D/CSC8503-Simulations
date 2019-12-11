@@ -16,6 +16,8 @@ namespace NCL {
 			bool isCollectable() { return collectable; };
 
 			void returnToStart();
+			void setStartMass(float f) {this->startingInMass = f;};
+			float getStartMass() { return startingInMass;};
 
 			static void setPoints(int i) { pointsToCollect = i; };
 			static int retrievePoints() { return pointsToCollect; };
@@ -23,6 +25,7 @@ namespace NCL {
 			int points;
 			bool collectable = true;
 			bool bonus;
+			float startingInMass = 0;
 
 			static int pointsToCollect;
 		};

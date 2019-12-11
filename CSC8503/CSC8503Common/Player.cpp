@@ -15,6 +15,7 @@ Player::Player(string name) {
 			if (collectable->isCollectable()) {
 				this->setCollectable(collectable);
 				collectable->GetTransform().SetWorldPosition(collectable->GetTransform().GetWorldPosition() + Vector3(0, 3, 0));
+				collectable->GetPhysicsObject()->SetInverseMass(20.0f);
 			}
 		}
 	};

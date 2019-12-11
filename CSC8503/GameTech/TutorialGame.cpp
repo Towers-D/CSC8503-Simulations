@@ -608,7 +608,7 @@ Enemy* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 
 Collectable* TutorialGame::AddAppleToWorld(const Vector3& position) {
 	Collectable* apple = new Collectable("Apple");
-
+	
 	SphereVolume* volume = new SphereVolume(0.7f);
 	apple->SetBoundingVolume((CollisionVolume*)volume);
 	apple->GetTransform().SetWorldScale(Vector3(4, 4, 4));
@@ -616,7 +616,7 @@ Collectable* TutorialGame::AddAppleToWorld(const Vector3& position) {
 
 	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), appleMesh, nullptr, basicShader));
 	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
-
+	apple->setStartMass(1.0f);
 	apple->GetPhysicsObject()->SetInverseMass(1.0f);
 	apple->GetPhysicsObject()->InitSphereInertia();
 
@@ -628,6 +628,7 @@ Collectable* TutorialGame::AddAppleToWorld(const Vector3& position) {
 Collectable* TutorialGame::AddBonusToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
 	Collectable* bonus = new Collectable("Bonus Cube", true, 500);
 	bonus->setStartingPosition(position);
+	bonus->setStartMass(inverseMass);
 	AABBVolume* volume = new AABBVolume(dimensions);
 
 	bonus->SetBoundingVolume((CollisionVolume*)volume);
