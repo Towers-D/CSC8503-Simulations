@@ -417,6 +417,8 @@ void TutorialGame::InitBridge() {
 	//Bridge Railings
 	AddCubeToWorld(Vector3(-129, 10, 0), Vector3(1, 3, 19.5), 0);
 	AddCubeToWorld(Vector3(-141, 10, 0), Vector3(1, 3, 19.5), 0);
+	
+	BridgeConstraintTest(Vector3(-135, 11, 18.5));
 }
 
 //From here on it's functions to add in objects to the world!
@@ -721,24 +723,22 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 	}
 }
 
-void TutorialGame::BridgeConstraintTest() {
-	Vector3 cubeSize = Vector3(2, 2, 2);
+void TutorialGame::BridgeConstraintTest(Vector3 startPos) {
+	Vector3 cubeSize = Vector3(5, 1, 1);
 
-	float	invCubeMass = 5; //how heavy middle pieces are
-	int		numLinks	= 10;
-	float	maxDistance	= 22; //constraint distance
-	float	cubeDistance = 20; // distance between links
+	float	invCubeMass = 1; //how heavy middle pieces are
+	int		numLinks	= 16;
+	float	maxDistance	= 2.05; //constraint distance
+	float	cubeDistance = 2.055555556; // distance between links
 
-	Vector3 startPos = Vector3(50, 50, 50);
+	GameObject* start = AddCubeToWorld(startPos, cubeSize, 0);
 
-	GameObject* start = AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
-
-	GameObject* end = AddCubeToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), cubeSize, 0);
+	GameObject* end = AddCubeToWorld(startPos - Vector3(0, 0, (numLinks + 2) * cubeDistance), cubeSize, 0);
 
 	GameObject* previous = start;
 
 	for (int i = 0; i < numLinks; ++i) {
-		GameObject* block = AddCubeToWorld(startPos + Vector3((i + 1) * cubeDistance, 0, 0), cubeSize, invCubeMass);
+		GameObject* block = AddCubeToWorld(startPos - Vector3(0, 0, (i + 1) * cubeDistance), cubeSize, invCubeMass);
 		PositionConstraint* constraint = new PositionConstraint(previous, block, maxDistance);
 		world->AddConstraint(constraint);
 		previous = block;
