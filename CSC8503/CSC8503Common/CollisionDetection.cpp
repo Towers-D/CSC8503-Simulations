@@ -145,6 +145,15 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 		return AABBSphereIntersection((AABBVolume&)* volB, transformB, (SphereVolume&)* volA, transformA, collisionInfo);
 	}
 
+	if (volA->type == VolumeType::OBB && volB->type == VolumeType::Sphere)
+		return OBBSphereIntersection((OBBVolume&)* volA, transformA, (SphereVolume&)* volB, transformB, collisionInfo);
+
+	if (volA->type == VolumeType::Sphere && volB->type == VolumeType::OBB) {
+		collisionInfo.a = b;
+		collisionInfo.b = a;
+		return OBBSphereIntersection((OBBVolume&)* volB, transformB, (SphereVolume&)* volA, transformA, collisionInfo);
+	}
+
 
 	return false;
 }
@@ -241,6 +250,31 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
 	float distance = (localPoint).Length();
 	if (distance < volumeB.GetRadius()) {
 		collisionInfo.AddContactPoint(closestPointOnBox, distance == 0.0f ? delta.Normalised() : localPoint.Normalised(), (volumeB.GetRadius() - distance));
+		return true;
+	}
+	return false;
+}
+
+bool CollisionDetection::OBBSphereIntersection(const OBBVolume& volumeA, const Transform& worldTransformA, const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
+	Quaternion obbOrientation = worldTransformA.GetWorldOrientation();
+	Vector3 obbPosition = worldTransformA.GetWorldPosition();
+	Matrix3 transform = obbOrientation.ToMatrix3();
+	Matrix3 invTransform = obbOrientation.Conjugate().ToMatrix3();
+
+	Transform localSphereTransform(worldTransformB);
+	localSphereTransform.SetWorldPosition(invTransform * (worldTransformB.GetWorldPosition() - obbPosition));
+	
+	Transform localCubeTransform(worldTransformA);
+	localCubeTransform.SetWorldPosition(invTransform * (worldTransformA.GetWorldPosition() - obbPosition));
+
+	Vector3 boxSize = volumeA.GetHalfDimensions();
+	Vector3 delta = localSphereTransform.GetWorldPosition() - localCubeTransform.GetWorldPosition();
+	Vector3 closestPointOnBox = Maths::Clamp(delta, -boxSize, boxSize);
+	Vector3 localPoint = delta - closestPointOnBox;
+	float distance = (localPoint).Length();
+	if (distance < volumeB.GetRadius()) {
+		collisionInfo.AddContactPoint(transform * closestPointOnBox, distance == 0.0f ? delta.Normalised() : localPoint.Normalised(), (volumeB.GetRadius() - distance));
+	
 		return true;
 	}
 	return false;
