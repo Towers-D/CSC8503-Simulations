@@ -14,7 +14,8 @@
 *.userprefs
 
 # Build results
-#[Dd]ebug/
+[Dd]ebug/
+!Win32/Debug
 *.tlog
 [Dd]ebugPublic/
 [Rr]elease/

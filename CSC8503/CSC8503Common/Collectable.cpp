@@ -14,6 +14,7 @@ Collectable::Collectable(string name, bool bonus, int points) {
 
 void Collectable::dropped() {
 	this->GetPhysicsObject()->SetInverseMass(startingInMass);
+
 	beginFunction = [this](GameObject* g) {
 		if (g->GetName() == "Island") {
 			this->swapCollectable();
