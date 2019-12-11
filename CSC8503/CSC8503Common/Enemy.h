@@ -25,10 +25,10 @@
 			
 			State getState() { return currentState; };
 			
-			void genPath(Vector3 endPos);
+			void genPath(Vector3 endPos, float time);
 
 			void setUpStateMachine();
-			void UpdateState();
+			void UpdateState(float time);
 		private:
 			State currentState = IDLE;
 			NavigationPath path;

@@ -64,6 +64,7 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
+	gameTime += dt;
 	timeRemaining -= dt;
 	float minutes = (timeRemaining / 60);
 	int seconds = (minutes - (int) minutes) * 60;
@@ -84,11 +85,12 @@ void TutorialGame::UpdateGame(float dt) {
 		Debug::Print("(G)ravity off", Vector2(10, 40));
 	}
 
-	chaser->UpdateState();
+	
 	Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2(10, 60));
 	SelectObject();
 	MoveSelectedObject();
 
+	chaser->UpdateState(gameTime);
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
 	physics->Update(dt);
@@ -198,8 +200,9 @@ void TutorialGame::PlayerMovement() {
 	//Goose Movement
 	Vector3 rightAxis = Vector3(modelMat.GetColumn(0)); //view is inverse of model!
 	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
-	float forceMul = player->isSwimming() ? 200: 50;
-	if (!player->isSwimming() || timeRemaining - floor(timeRemaining) < 0.2f) {
+	float forceMul = player->isSwimming() ? 400: 50;
+	int milli = (gameTime - floor(gameTime)) * 100;
+	if (!player->isSwimming() || milli < 5) {
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A))
 			player->GetPhysicsObject()->AddForce(-rightAxis * forceMul);
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D))
@@ -389,12 +392,12 @@ void TutorialGame::InitWorld() {
 	
 	Collectable* apple = AddAppleToWorld(Vector3(35, 2, 0));
 	Collectable* bonusCube = AddBonusToWorld(Vector3(35, 2, 25), Vector3(0.5, 0.5, 0.5));
-
-
 	GameObject* lake = AddLakeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
-	
-
 	GameObject* Island = AddIslandToWorld();
+
+	GameObject* OBB = AddOBBCubeToWorld(Vector3(-10, 0, -10), Vector3(5, 5, 15), 0);
+	Quaternion q = Matrix4::Rotation(30, Vector3(1, 0, 0));
+	OBB->GetTransform().SetLocalOrientation(q);
 
 	AddCubeToWorld(Vector3(-300, -2, 75), Vector3(200, 2, 25), 0);
 	AddCubeToWorld(Vector3(-300, -2, -75), Vector3(200, 2, 25), 0);
@@ -460,6 +463,27 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	GameObject* cube = new GameObject("cube");
 
 	AABBVolume* volume = new AABBVolume(dimensions);
+
+	cube->SetBoundingVolume((CollisionVolume*)volume);
+
+	cube->GetTransform().SetWorldPosition(position);
+	cube->GetTransform().SetWorldScale(dimensions);
+
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
+
+	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
+	cube->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(cube);
+
+	return cube;
+}
+
+GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
+	GameObject* cube = new GameObject("cube");
+
+	OBBVolume* volume = new OBBVolume(dimensions);
 
 	cube->SetBoundingVolume((CollisionVolume*)volume);
 

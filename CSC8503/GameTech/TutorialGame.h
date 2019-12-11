@@ -51,6 +51,7 @@ namespace NCL {
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddLakeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddIslandToWorld();
 			//IT'S HAPPENING
@@ -74,6 +75,7 @@ namespace NCL {
 
 			float	forceMagnitude;
 			float	timeRemaining = 180;
+			float	gameTime = 0;
 
 			GameObject* selectionObject = nullptr;
 

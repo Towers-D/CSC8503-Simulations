@@ -75,7 +75,7 @@ void Enemy::setUpStateMachine() {
 	machine->AddTransition(RtoI);
 }
 
-void Enemy::UpdateState() {
+void Enemy::UpdateState(float time) {
 	distance = this->GetTransform().GetWorldPosition().DistanceBetween(playerPointer->GetTransform().GetWorldPosition());
 	startDist = this->GetTransform().GetWorldPosition().DistanceBetweenNoY(startPos);
 	
@@ -87,40 +87,44 @@ void Enemy::UpdateState() {
 
 	switch (currentState) {
 		case CHASING:
-			genPath(playerPointer->GetTransform().GetWorldPosition());
+			genPath(playerPointer->GetTransform().GetWorldPosition(), time);
 			break;
 		case RETURN:
-			genPath(startPos);
+			genPath(startPos, time);
 			break;
 		case WATCHING:
 			lookAt(playerPointer->GetTransform().GetWorldPosition());
 	}
 }
 
-void Enemy::genPath(Vector3 endPos) {
-	nodeList.clear();
-	path.Clear();
-	lookAt(endPos);
-	if (lake.getClosestNodeType(playerPointer->GetTransform().GetWorldPosition()) == '.' || currentState == RETURN) {
-		bool found = lake.FindPath(this->GetTransform().GetWorldPosition(), endPos, this->path);
-		Vector3 pos;
-		while (this->path.PopWaypoint(pos))
-			nodeList.push_back(pos);
-		for (int i = 1; i < nodeList.size(); ++i) {
-			Vector3 a = nodeList[i - 1];
-			Vector3 b = nodeList[i];
-			a.y += 5;
-			b.y += 5;
-			Debug::DrawLine(a, b, Vector4(0, 1, 0, 1));
+void Enemy::genPath(Vector3 endPos, float time) {
+	int milli = (time - floor(time)) * 100;
+	if (milli % 20 < 3) {
+		nodeList.clear();
+		path.Clear();
+		lookAt(endPos);
+		if (lake.getClosestNodeType(playerPointer->GetTransform().GetWorldPosition()) == '.' || currentState == RETURN) {
+			bool found = lake.FindPath(this->GetTransform().GetWorldPosition(), endPos, this->path);
+			Vector3 pos;
+			while (this->path.PopWaypoint(pos))
+				nodeList.push_back(pos);
+			for (int i = 1; i < nodeList.size(); ++i) {
+				Vector3 a = nodeList[i - 1];
+				Vector3 b = nodeList[i];
+				a.y += 5;
+				b.y += 5;
+				Debug::DrawLine(a, b, Vector4(0, 1, 0, 1));
+			}
+		}
+	}
+
+	if (!nodeList.empty()) {
+		if (lake.getClosestNodePos(this->GetTransform().GetWorldPosition()) == nodeList[0]) {
+			nodeList.erase(std::remove(nodeList.begin(), nodeList.end(), nodeList[0]), nodeList.end());
 		}
 		if (!nodeList.empty()) {
-			if (lake.getClosestNodePos(this->GetTransform().GetWorldPosition()) == nodeList[0]) {
-				nodeList.erase(std::remove(nodeList.begin(), nodeList.end(), nodeList[0]), nodeList.end());
-			}
-			if (!nodeList.empty()) {
-				Vector3 dir = this->GetTransform().GetWorldPosition().GetDirection(nodeList[0]).Normalised();
-				this->GetPhysicsObject()->AddForce(dir * 50);
-			}
+			Vector3 dir = this->GetTransform().GetWorldPosition().GetDirection(nodeList[0]).Normalised();
+			this->GetPhysicsObject()->AddForce(dir * 100);
 		}
 	}
 }
