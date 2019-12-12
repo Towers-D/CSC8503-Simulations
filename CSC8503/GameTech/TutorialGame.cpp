@@ -67,39 +67,72 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	gameTime += dt;
-	timeRemaining -= dt;
-	float minutes = (timeRemaining / 60);
-	int seconds = (minutes - (int) minutes) * 60;
-	Debug::Print("Time Remaining: " + std::to_string((int) minutes) + ":" + ((seconds < 10) ? "0" : "" ) + std::to_string(seconds), Vector2(300, 650), Vector4(1,0.5,0,1));
-	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
+	if (currState == Menu) {
+		updateMenu();
 	}
-	if (lockedObject != nullptr) {
-		LockedCameraMovement();
+	else if (currState == Single) {
+		gameTime += dt;
+		timeRemaining -= dt;
+		float minutes = (timeRemaining / 60);
+		int seconds = (minutes - (int)minutes) * 60;
+		Debug::Print("Time Remaining: " + std::to_string((int)minutes) + ":" + ((seconds < 10) ? "0" : "") + std::to_string(seconds), Vector2(300, 650), Vector4(1, 0.5, 0, 1));
+		if (!inSelectionMode) {
+			world->GetMainCamera()->UpdateCamera(dt);
+		}
+		if (lockedObject != nullptr) {
+			LockedCameraMovement();
+		}
+
+		UpdateKeys();
+
+		if (useGravity) {
+			Debug::Print("(G)ravity on", Vector2(10, 40));
+		} else {
+			Debug::Print("(G)ravity off", Vector2(10, 40));
+		}
+
+
+		Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2(10, 60));
+		SelectObject();
+		MoveSelectedObject();
+
+		chaser->UpdateState(gameTime);
+		world->UpdateWorld(dt);
+		renderer->Update(dt);
+		physics->Update(dt);
 	}
-
-	UpdateKeys();
-
-	if (useGravity) {
-		Debug::Print("(G)ravity on", Vector2(10, 40));
-	}
-	else {
-		Debug::Print("(G)ravity off", Vector2(10, 40));
-	}
-
-	
-	Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2(10, 60));
-	SelectObject();
-	MoveSelectedObject();
-
-	chaser->UpdateState(gameTime);
-	world->UpdateWorld(dt);
-	renderer->Update(dt);
-	physics->Update(dt);
 
 	Debug::FlushRenderables();
 	renderer->Render();
+}
+
+void TutorialGame::updateMenu() {
+	
+	float inc = screenHeight / 5;
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::S) || Window::GetKeyboard()->KeyPressed(KeyboardKeys::DOWN)) {
+		menuPos++;
+		if (menuPos > 3)
+			menuPos -= 4;
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::W) || Window::GetKeyboard()->KeyPressed(KeyboardKeys::UP)) {
+		menuPos--;
+		if (menuPos < 0)
+			menuPos += 4;
+	}
+	string sel = "<";
+	Debug::Print("Single Player " + ((menuPos == 1) ? sel : " "), Vector2(20, inc * 4), Vector4(1, 1, 1, 1));
+	Debug::Print("Multiplayer (Client) " + ((menuPos == 2) ? sel : " "), Vector2(20, inc * 3), Vector4(1, 1, 1, 1));
+	Debug::Print("Multiplayer (Host) " + ((menuPos == 3) ? sel : " "), Vector2(20, inc * 2), Vector4(1, 1, 1, 1));
+	Debug::Print("Exit " + ((menuPos == 0) ? sel : " "), Vector2(20, inc * 1), Vector4(1, 1, 1, 1));
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN) || Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)) {
+		updateState();
+	}
+}
+
+void TutorialGame::updateState() {
+	std::cout << "Here, menuPos: " << (GameState)menuPos << std::endl;
+	currState = (GameState) menuPos;
 }
 
 void TutorialGame::UpdateKeys() {

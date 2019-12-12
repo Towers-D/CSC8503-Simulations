@@ -17,6 +17,14 @@
 namespace NCL {
 	namespace CSC8503 {
 		class TutorialGame		{
+
+			enum GameState {
+				Menu,
+				Single,
+				Client,
+				Server
+			};
+
 		public:
 			TutorialGame(int width, int height);
 			~TutorialGame();
@@ -30,6 +38,12 @@ namespace NCL {
 			void UpdateKeys();
 
 			void InitWorld();
+			void updateMenu();
+			void updateState();
+
+			int menuPos = 1;
+
+			GameState currState = Menu;
 
 			/*
 			These are some of the world/object creation functions I created when testing the functionality
