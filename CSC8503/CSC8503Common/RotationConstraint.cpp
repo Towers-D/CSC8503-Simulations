@@ -34,8 +34,7 @@ void RotationConstraint::UpdateConstraint(float dt) {
 
 	if (xRot < 0) { xRot += 360; };
 	if (xRot > 360) { xRot -= 360; };
-	std::cout << xRot << std::endl;
-	
+
 	PhysicsObject* physA = objectA->GetPhysicsObject();
 	PhysicsObject* physB = objectB->GetPhysicsObject();
 	
@@ -57,17 +56,17 @@ void RotationConstraint::UpdateConstraint(float dt) {
 			aImpulse.y = dist.y * lambda;
 			bImpulse.y = -dist.y * lambda * 0.1;
 		}
+
 		float xDiff = xRot - 180;
 		float ang = 180;
-		if (abs(xDiff) > angle) {
+		if (abs(xDiff) > angle)
 			ang = xRot - (xDiff - angle);
-		}
-		else {
+		else
 			ang = -xDiff;
-		}
-		if (xRot != 180) {
+
+		//Apply impulse so gate wills lowly return to normal
+		if (xRot != 180)
 			bImpulse.z = ((xRot / 180) - 1) * 2;
-		}
 
 		objectB->GetTransform().SetLocalOrientation(Quaternion(Matrix4::Rotation(ang, Vector3(0, 1, 0))));
 		physA->ApplyLinearImpulse(aImpulse * 0);

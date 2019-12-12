@@ -377,43 +377,56 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-	//Vector3(30, 2, 0)
-	player = AddGooseToWorld(Vector3(-320, 2, 70));
+
+	player = AddGooseToWorld(Vector3(-300, 2, 0));
 	//AddParkKeeperToWorld(Vector3(40, 5, 0));
 	chaser = AddCharacterToWorld(Vector3(45, 5, 0));
 	chaser->setUpStateMachine();
-	//BridgeConstraintTest();
-	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	
 	Collectable* apple = AddAppleToWorld(Vector3(35, 2, 0));
 	Collectable* bonusCube = AddBonusToWorld(Vector3(35, 2, 25), Vector3(0.5, 0.5, 0.5));
 	GameObject* lake = AddLakeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
 	GameObject* Island = AddIslandToWorld();
 
-	AddCubeToWorld(Vector3(-300, -2, 75), Vector3(200, 2, 25), 0);
-	AddCubeToWorld(Vector3(-300, -2, -75), Vector3(200, 2, 25), 0);
-	AddCubeToWorld(Vector3(-550, -2, 0), Vector3(50, 2, 100), 0);
+	
 	InitGate();
 	InitBridge();
-	AddFloorToWorld(Vector3(0, -2, 0));
+	InitBoundaries();
+	
+}
+
+void TutorialGame::InitBoundaries() {
+	//Floor Sections
+	AddFloorToWorld(Vector3(0, -2, 0), Vector3(100, 2, 100));
+	AddFloorToWorld(Vector3(-300, -2, 75), Vector3(200, 2, 25));
+	AddFloorToWorld(Vector3(-300, -2, -75), Vector3(200, 2, 25));
+	AddFloorToWorld(Vector3(-550, -2, 0), Vector3(50, 2, 100));
+
+	//Long Borders
+	AddCubeToWorld(Vector3(-250, 2, -100), Vector3(351, 2, 1), "Border", 0);
+	AddCubeToWorld(Vector3(-250, 2, 100), Vector3(351, 2, 1), "Border", 0);
+
+	//Short Borders
+	AddCubeToWorld(Vector3(100, 2, 0), Vector3(1, 2, 99), "Border", 0);
+	AddCubeToWorld(Vector3(-600, 2, 0), Vector3(1, 2, 99), "Border", 0);
 }
 
 //Generate a Sectioned off area on the side of the park, which has a gate that is constrained
 void TutorialGame::InitGate() {
 	//Fences Parralell to the Z-Axis
-	AddCubeToWorld(Vector3(-350, 1.5, 87.5), Vector3(1, 3, 11.5), 0);
-	AddCubeToWorld(Vector3(-290, 1.5, 87.5), Vector3(1, 3, 11.5), 0);
+	AddCubeToWorld(Vector3(-350, 1.5, 87.5), Vector3(1, 3, 11.5), "Fence", 0);
+	AddCubeToWorld(Vector3(-290, 1.5, 87.5), Vector3(1, 3, 11.5), "Fence", 0);
 
 	//Fences Parralell to X-Axis
-	AddCubeToWorld(Vector3(-337.25, 1.5, 75), Vector3(13.75, 3, 1), 0);
-	AddCubeToWorld(Vector3(-302.75, 1.5, 75), Vector3(13.75, 3, 1), 0);
+	AddCubeToWorld(Vector3(-337.25, 1.5, 75), Vector3(13.75, 3, 1), "Fence", 0);
+	AddCubeToWorld(Vector3(-302.75, 1.5, 75), Vector3(13.75, 3, 1), "Fence", 0);
 
 	//Gate Posts
-	GameObject* southPost = AddCubeToWorld(Vector3(-316.5, 2, 75), Vector3(1.1, 3.25, 1.1), 0);
-	AddCubeToWorld(Vector3(-323.5, 2, 75), Vector3(1.1, 3.25, 1.1), 0);
+	GameObject* southPost = AddCubeToWorld(Vector3(-316.5, 2, 75), Vector3(1.1, 3.25, 1.1), "South Post", 0);
+	AddCubeToWorld(Vector3(-323.5, 2, 75), Vector3(1.1, 3.25, 1.1), "North Post", 0);
 	//Gate
 	Quaternion q = Matrix4::Rotation(0, Vector3(0,0,0));
-	GameObject* gate = AddOBBCubeToWorld(Vector3(-320, 2, 75), Vector3(3.5, 1.5, 0.5), q, 0.2f);
+	GameObject* gate = AddOBBCubeToWorld(Vector3(-320, 2, 75), Vector3(3.5, 1.5, 0.5), q, "Gate", 0.2f);
 
 	PositionConstraint* gatePos = new PositionConstraint(southPost, gate, gate->GetTransform().GetWorldPosition().DistanceBetween(southPost->GetTransform().GetWorldPosition()));
 	RotationConstraint* hinge = new RotationConstraint(southPost, gate, 105);
@@ -426,22 +439,22 @@ void TutorialGame::InitBridge() {
 	Quaternion q2 = Matrix4::Rotation(-30, Vector3(1, 0, 0));
 
 	//Bridge Ramps
-	AddOBBCubeToWorld(Vector3(-135, 0, 40), Vector3(5, 5, 15), q1, 0);
-	AddOBBCubeToWorld(Vector3(-135, 0, -40), Vector3(5, 5, 15), q2, 0);
+	AddOBBCubeToWorld(Vector3(-135, 0, 40), Vector3(5, 5, 15), q1, "Ramp", 0);
+	AddOBBCubeToWorld(Vector3(-135, 0, -40), Vector3(5, 5, 15), q2, "Ramp", 0);
 	
 	//Bridge Flateners
-	AddCubeToWorld(Vector3(-135, 6.85, -24.5), Vector3(5, 5, 5), 0);
-	AddCubeToWorld(Vector3(-135, 6.85, 24.5), Vector3(5, 5, 5), 0);
+	AddCubeToWorld(Vector3(-135, 6.85, -24.5), Vector3(5, 5, 5), "Bridge Level Off", 0);
+	AddCubeToWorld(Vector3(-135, 6.85, 24.5), Vector3(5, 5, 5), "Bridge Level Off", 0);
 
 	//Bridge Coverings
-	AddCubeToWorld(Vector3(-129, 3, -24.5), Vector3(1, 10, 5), 0);
-	AddCubeToWorld(Vector3(-141, 3, -24.5), Vector3(1, 10, 5), 0);
-	AddCubeToWorld(Vector3(-129, 3, 24.5), Vector3(1, 10, 5), 0);
-	AddCubeToWorld(Vector3(-141, 3, 24.5), Vector3(1, 10, 5), 0);
+	AddCubeToWorld(Vector3(-129, 3, -24.5), Vector3(1, 10, 5), "Bridge Pillar", 0);
+	AddCubeToWorld(Vector3(-141, 3, -24.5), Vector3(1, 10, 5), "Bridge Pillar", 0);
+	AddCubeToWorld(Vector3(-129, 3, 24.5), Vector3(1, 10, 5), "Bridge Pillar", 0);
+	AddCubeToWorld(Vector3(-141, 3, 24.5), Vector3(1, 10, 5), "Bridge Pillar", 0);
 
 	//Bridge Railings
-	AddCubeToWorld(Vector3(-129, 10, 0), Vector3(1, 3, 19.5), 0);
-	AddCubeToWorld(Vector3(-141, 10, 0), Vector3(1, 3, 19.5), 0);
+	AddCubeToWorld(Vector3(-129, 10, 0), Vector3(1, 3, 19.5), "Railing", 0);
+	AddCubeToWorld(Vector3(-141, 10, 0), Vector3(1, 3, 19.5), "Railing", 0);
 	
 	BridgeConstraintTest(Vector3(-135, 11, 18.5));
 }
@@ -452,13 +465,12 @@ void TutorialGame::InitBridge() {
 A single function to add a large immoveable cube to the bottom of our world
 
 */
-GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
+GameObject* TutorialGame::AddFloorToWorld(const Vector3& position, const Vector3& dimensions) {
 	GameObject* floor = new GameObject("floor");
 	
-	Vector3 floorSize = Vector3(100, 2, 100);
-	AABBVolume* volume = new AABBVolume(floorSize);
+	AABBVolume* volume = new AABBVolume(dimensions);
 	floor->SetBoundingVolume((CollisionVolume*)volume);
-	floor->GetTransform().SetWorldScale(floorSize);
+	floor->GetTransform().SetWorldScale(dimensions);
 	floor->GetTransform().SetWorldPosition(position);
 
 	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
@@ -499,8 +511,8 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 	return sphere;
 }
 
-GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
-	GameObject* cube = new GameObject("cube");
+GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, string name, float inverseMass) {
+	GameObject* cube = new GameObject(name);
 
 	AABBVolume* volume = new AABBVolume(dimensions);
 
@@ -520,8 +532,8 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	return cube;
 }
 
-GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, Quaternion q,  float inverseMass) {
-	GameObject* cube = new GameObject("cube");
+GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, Quaternion q,  string name, float inverseMass) {
+	GameObject* cube = new GameObject(name);
 
 	OBBVolume* volume = new OBBVolume(dimensions);
 
@@ -743,7 +755,7 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 	for (int x = 1; x < numCols+1; ++x) {
 		for (int z = 1; z < numRows+1; ++z) {
 			Vector3 position = Vector3(x * colSpacing, 10.0f, z * rowSpacing);
-			AddCubeToWorld(position, cubeDims, 1.0f);
+			AddCubeToWorld(position, cubeDims, "cube", 1.0f);
 		}
 	}
 }
@@ -756,14 +768,14 @@ void TutorialGame::BridgeConstraintTest(Vector3 startPos) {
 	float	maxDistance	= 2.05; //constraint distance
 	float	cubeDistance = 2.055555556; // distance between links
 
-	GameObject* start = AddCubeToWorld(startPos, cubeSize, 0);
+	GameObject* start = AddCubeToWorld(startPos, cubeSize, "Bridge Start", 0);
 
-	GameObject* end = AddCubeToWorld(startPos - Vector3(0, 0, (numLinks + 2) * cubeDistance), cubeSize, 0);
+	GameObject* end = AddCubeToWorld(startPos - Vector3(0, 0, (numLinks + 2) * cubeDistance), cubeSize, "Bridge End", 0);
 
 	GameObject* previous = start;
 
 	for (int i = 0; i < numLinks; ++i) {
-		GameObject* block = AddCubeToWorld(startPos - Vector3(0, 0, (i + 1) * cubeDistance), cubeSize, invCubeMass);
+		GameObject* block = AddCubeToWorld(startPos - Vector3(0, 0, (i + 1) * cubeDistance), cubeSize, "Bridge Strut", invCubeMass);
 		PositionConstraint* constraint = new PositionConstraint(previous, block, maxDistance);
 		world->AddConstraint(constraint);
 		previous = block;
@@ -777,8 +789,8 @@ void TutorialGame::SimpleGJKTest() {
 	Vector3 dimensions		= Vector3(5, 5, 5);
 	Vector3 floorDimensions = Vector3(100, 2, 100);
 
-	GameObject* fallingCube = AddCubeToWorld(Vector3(0, 20, 0), dimensions, 10.0f);
-	GameObject* newFloor	= AddCubeToWorld(Vector3(0, 0, 0), floorDimensions, 0.0f);
+	GameObject* fallingCube = AddCubeToWorld(Vector3(0, 20, 0), dimensions, "cube", 10.0f);
+	GameObject* newFloor	= AddCubeToWorld(Vector3(0, 0, 0), floorDimensions,"cube", 0.0f);
 
 	delete fallingCube->GetBoundingVolume();
 	delete newFloor->GetBoundingVolume();
