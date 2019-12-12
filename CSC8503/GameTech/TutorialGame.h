@@ -51,8 +51,8 @@ namespace NCL {
 
 			GameObject* AddFloorToWorld(const Vector3& position, const Vector3& dimensions);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
-			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, string name = "Cube", float inverseMass = 10.0f);
-			GameObject* AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, Quaternion q, string name = "OBB", float inverseMass = 10.0f);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, string name = "Cube", float inverseMass = 10.0f, Vector4 colour = Vector4(1, 1, 1, 1));
+			GameObject* AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, Quaternion q, string name = "OBB", float inverseMass = 10.0f, Vector4 colour = Vector4(1, 1, 1, 1));
 			GameObject* AddLakeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddIslandToWorld();
 			void InitBoundaries();

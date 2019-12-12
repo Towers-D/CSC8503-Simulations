@@ -49,7 +49,7 @@ GameTechRenderer::~GameTechRenderer()	{
 
 void GameTechRenderer::RenderFrame() {
 	glEnable(GL_CULL_FACE);
-	glClearColor(1, 1, 1, 1);
+	glClearColor(0.529, 0.808, 0.922, 1);
 	BuildObjectList();
 	SortObjectList();
 	RenderShadowMap();
