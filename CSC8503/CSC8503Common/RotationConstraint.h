@@ -19,9 +19,6 @@ namespace NCL {
 		protected:
 			GameObject* objectA;
 			GameObject* objectB;
-
-			Vector3 nearestPoint;
-
 			float angle;
 		};
 	}

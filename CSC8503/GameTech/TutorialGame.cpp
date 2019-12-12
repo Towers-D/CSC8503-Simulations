@@ -377,7 +377,8 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-	player = AddGooseToWorld(Vector3(30, 2, 0));
+	//Vector3(30, 2, 0)
+	player = AddGooseToWorld(Vector3(-320, 2, 70));
 	//AddParkKeeperToWorld(Vector3(40, 5, 0));
 	chaser = AddCharacterToWorld(Vector3(45, 5, 0));
 	chaser->setUpStateMachine();
@@ -404,14 +405,19 @@ void TutorialGame::InitGate() {
 	AddCubeToWorld(Vector3(-290, 1.5, 87.5), Vector3(1, 3, 11.5), 0);
 
 	//Fences Parralell to X-Axis
-	GameObject* northGate = AddCubeToWorld(Vector3(-337.25, 1.5, 75), Vector3(13.75, 3, 1), 0);
-	GameObject* southGate = AddCubeToWorld(Vector3(-302.75, 1.5, 75), Vector3(13.75, 3, 1), 0);
+	AddCubeToWorld(Vector3(-337.25, 1.5, 75), Vector3(13.75, 3, 1), 0);
+	AddCubeToWorld(Vector3(-302.75, 1.5, 75), Vector3(13.75, 3, 1), 0);
 
+	//Gate Posts
+	GameObject* southPost = AddCubeToWorld(Vector3(-316.5, 2, 75), Vector3(1.1, 3.25, 1.1), 0);
+	AddCubeToWorld(Vector3(-323.5, 2, 75), Vector3(1.1, 3.25, 1.1), 0);
 	//Gate
 	Quaternion q = Matrix4::Rotation(0, Vector3(0,0,0));
-	GameObject* gate = AddOBBCubeToWorld(Vector3(-320, 2, 75), Vector3(3.5, 1.5, 0.5), q, 10);
+	GameObject* gate = AddOBBCubeToWorld(Vector3(-320, 2, 75), Vector3(3.5, 1.5, 0.5), q, 0.2f);
 
-	RotationConstraint* hinge = new RotationConstraint(southGate, gate, 40);
+	PositionConstraint* gatePos = new PositionConstraint(southPost, gate, gate->GetTransform().GetWorldPosition().DistanceBetween(southPost->GetTransform().GetWorldPosition()));
+	RotationConstraint* hinge = new RotationConstraint(southPost, gate, 105);
+	world->AddConstraint(gatePos);
 	world->AddConstraint(hinge);
 }
 

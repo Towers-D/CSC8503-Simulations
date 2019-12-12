@@ -42,9 +42,7 @@ void PhysicsSystem::Clear() {
 }
 
 /*
-
 This is the core of the physics engine update
-
 */
 void PhysicsSystem::Update(float dt) {
 	GameTimer testTimer;
@@ -59,16 +57,13 @@ void PhysicsSystem::Update(float dt) {
 	if (dTOffset > 8 * iterationDt) { //the physics engine cant catch up!
 		iterationDt = 1.0f / 15.0f; //it'll just have to run bigger timesteps...
 		//std::cout << "Setting physics iterations to 15" << iterationDt << std::endl;
-	}
-	else if (dTOffset > 4  * iterationDt) { //the physics engine cant catch up!
+	} else if (dTOffset > 4 * iterationDt) { //the physics engine cant catch up!
 		iterationDt = 1.0f / 30.0f; //it'll just have to run bigger timesteps...
 		//std::cout << "Setting iteration dt to 4 case " << iterationDt << std::endl;
-	}
-	else if (dTOffset > 2* iterationDt) { //the physics engine cant catch up!
+	} else if (dTOffset > 2 * iterationDt) { //the physics engine cant catch up!
 		iterationDt = 1.0f / 60.0f; //it'll just have to run bigger timesteps...
 		//std::cout << "Setting iteration dt to 2 case " << iterationDt << std::endl;
-	}
-	else {
+	} else {
 		//std::cout << "Running normal update " << iterationDt << std::endl;
 	}
 
@@ -79,28 +74,27 @@ void PhysicsSystem::Update(float dt) {
 		UpdateObjectAABBs();
 	}
 
-	while(dTOffset > iterationDt *0.5) {
+	while (dTOffset > iterationDt * 0.5) {
 		IntegrateAccel(iterationDt); //Update accelerations from external forces
 		if (useBroadPhase) {
 			BroadPhase();
 			NarrowPhase();
-		}
-		else {
+		} else {
 			BasicCollisionDetection();
 		}
 
 		//This is our simple iterative solver - 
 		//we just run things multiple times, slowly moving things forward
 		//and then rechecking that the constraints have been met		
-		float constraintDt = iterationDt /  (float)constraintIterationCount;
+		float constraintDt = iterationDt / (float)constraintIterationCount;
 
 		for (int i = 0; i < constraintIterationCount; ++i) {
-			UpdateConstraints(constraintDt);	
+			UpdateConstraints(constraintDt);
 		}
-		
+
 		IntegrateVelocity(iterationDt); //update positions from new velocity changes
 
-		dTOffset -= iterationDt; 
+		dTOffset -= iterationDt;
 	}
 	ClearForces();	//Once we've finished with the forces, reset them to zero
 
