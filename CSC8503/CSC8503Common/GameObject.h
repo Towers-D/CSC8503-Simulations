@@ -24,7 +24,7 @@ namespace NCL {
 				boundingVolume = vol;
 			}
 
-			const CollisionVolume* GetBoundingVolume() const {
+			CollisionVolume* GetBoundingVolume() const {
 				return boundingVolume;
 			}
 

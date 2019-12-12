@@ -392,8 +392,27 @@ void TutorialGame::InitWorld() {
 	AddCubeToWorld(Vector3(-300, -2, 75), Vector3(200, 2, 25), 0);
 	AddCubeToWorld(Vector3(-300, -2, -75), Vector3(200, 2, 25), 0);
 	AddCubeToWorld(Vector3(-550, -2, 0), Vector3(50, 2, 100), 0);
+	InitGate();
 	InitBridge();
 	AddFloorToWorld(Vector3(0, -2, 0));
+}
+
+//Generate a Sectioned off area on the side of the park, which has a gate that is constrained
+void TutorialGame::InitGate() {
+	//Fences Parralell to the Z-Axis
+	AddCubeToWorld(Vector3(-350, 1.5, 87.5), Vector3(1, 3, 11.5), 0);
+	AddCubeToWorld(Vector3(-290, 1.5, 87.5), Vector3(1, 3, 11.5), 0);
+
+	//Fences Parralell to X-Axis
+	GameObject* northGate = AddCubeToWorld(Vector3(-337.25, 1.5, 75), Vector3(13.75, 3, 1), 0);
+	GameObject* southGate = AddCubeToWorld(Vector3(-302.75, 1.5, 75), Vector3(13.75, 3, 1), 0);
+
+	//Gate
+	Quaternion q = Matrix4::Rotation(0, Vector3(0,0,0));
+	GameObject* gate = AddOBBCubeToWorld(Vector3(-320, 2, 75), Vector3(3.5, 1.5, 0.5), q, 10);
+
+	RotationConstraint* hinge = new RotationConstraint(southGate, gate, 40);
+	world->AddConstraint(hinge);
 }
 
 void TutorialGame::InitBridge() {
@@ -726,7 +745,7 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 void TutorialGame::BridgeConstraintTest(Vector3 startPos) {
 	Vector3 cubeSize = Vector3(5, 1, 1);
 
-	float	invCubeMass = 1; //how heavy middle pieces are
+	float	invCubeMass = 0.1; //how heavy middle pieces are
 	int		numLinks	= 16;
 	float	maxDistance	= 2.05; //constraint distance
 	float	cubeDistance = 2.055555556; // distance between links

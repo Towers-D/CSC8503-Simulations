@@ -9,6 +9,7 @@
 
 #include "../CSC8503Common/NavigationGrid.h"
 #include "../CSC8503Common/PositionConstraint.h"
+#include "../CSC8503Common/RotationConstraint.h"
 #include "../CSC8503Common/Player.h"
 #include "../CSC8503Common/Collectable.h"
 #include "../CSC8503Common/Enemy.h"
@@ -55,6 +56,7 @@ namespace NCL {
 			GameObject* AddLakeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddIslandToWorld();
 			void InitBridge();
+			void InitGate();
 			//IT'S HAPPENING
 			Player* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
