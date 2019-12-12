@@ -14,15 +14,37 @@
 #include "../CSC8503Common/Collectable.h"
 #include "../CSC8503Common/Enemy.h"
 
+#include "../CSC8503Common/GameServer.h"
+#include "../CSC8503Common/GameClient.h"
+
 namespace NCL {
 	namespace CSC8503 {
+
+		class TestPacketReciever : public PacketReceiver {
+		public:
+			TestPacketReciever(string name) {
+				this->name = name;
+			}
+
+			void ReceivePacket(int type, GamePacket* payload, int source) {
+				if (type == String_Message) {
+					StringPacket* realPacket = (StringPacket*)payload;
+					string msg = realPacket->GetStringFromData();
+					std::cout << name << " recieved message: " << msg << std::endl;
+				}
+			}
+		protected:
+			string name;
+		};
+
 		class TutorialGame		{
 
 			enum GameState {
 				Menu,
 				Single,
 				Client,
-				Server
+				Server,
+				Results
 			};
 
 		public:
@@ -84,6 +106,7 @@ namespace NCL {
 			GameWorld*			world;
 
 			Player* player;
+			Player* player2;
 			Enemy* chaser;
 			PositionConstraint* playColl = nullptr;
 
@@ -119,7 +142,15 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
+
+			//Networking
+			NetworkBase* base = nullptr;
+			GameServer* server = nullptr;
+			GameClient* localClient = nullptr;
+			GameClient* foreignClient = nullptr;
+			TestPacketReciever serverReceiver = TestPacketReciever("Server");
+			TestPacketReciever locClientreceiver = TestPacketReciever("localClient");
+			TestPacketReciever forClientreceiver = TestPacketReciever("foreignClient");
 		};
 	}
 }
-

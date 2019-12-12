@@ -46,6 +46,9 @@ void TutorialGame::InitialiseAssets() {
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	blankTex = (OGLTexture*)TextureLoader::LoadAPITexture("Blank.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
+	
+	useGravity = !useGravity; //Toggle gravity!
+	physics->UseGravity(useGravity);
 
 	InitCamera();
 	InitWorld();
@@ -67,10 +70,15 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
+	float updater = 0;
 	if (currState == Menu) {
 		updateMenu();
 	}
+	else if (currState == Results) {
+
+	}
 	else if (currState == Single) {
+		updater = dt;
 		gameTime += dt;
 		timeRemaining -= dt;
 		float minutes = (timeRemaining / 60);
@@ -82,25 +90,55 @@ void TutorialGame::UpdateGame(float dt) {
 		if (lockedObject != nullptr) {
 			LockedCameraMovement();
 		}
-
 		UpdateKeys();
-
-		if (useGravity) {
-			Debug::Print("(G)ravity on", Vector2(10, 40));
-		} else {
-			Debug::Print("(G)ravity off", Vector2(10, 40));
-		}
-
-
-		Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2(10, 60));
+		Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2((screenWidth/2) - 250, screenHeight - 50));
 		SelectObject();
 		MoveSelectedObject();
-
 		chaser->UpdateState(gameTime);
-		world->UpdateWorld(dt);
-		renderer->Update(dt);
-		physics->Update(dt);
 	}
+	else if (currState == Server) {
+		NetworkBase::Initialise();
+		serverReceiver = TestPacketReciever("Server");
+		locClientreceiver = TestPacketReciever("Client1");
+		
+		int port = NetworkBase::GetDefaultPort();
+		if (server == nullptr) {
+			server = new GameServer(port, 2);
+			server->RegisterPacketHandler(String_Message, &serverReceiver);
+		}
+		if (localClient == nullptr) {
+			localClient = new GameClient();
+			localClient->RegisterPacketHandler(String_Message, &locClientreceiver);
+			bool con = localClient->Connect(127, 0, 0, 1, port);
+		}	
+		server->SendGlobalPacket(StringPacket("is Everyone here? "));
+		localClient->SendPacket(StringPacket("Client A is here"));
+		
+		if (server->getClientCount() == 2) {
+			server->SendGlobalPacket(StringPacket("Everyone is here"));
+		}
+		else {
+			server->SendGlobalPacket(StringPacket("Waiting for more players"));
+		}
+		server->UpdateServer();
+		localClient->UpdateClient();
+	}
+	else if (currState == Client) {
+		NetworkBase::Initialise();
+		locClientreceiver = TestPacketReciever("Client2");
+		int port = NetworkBase::GetDefaultPort();
+		if (foreignClient == nullptr) {
+			foreignClient = new GameClient();
+			foreignClient->RegisterPacketHandler(String_Message, &forClientreceiver);
+			bool con = foreignClient->Connect(127, 0, 0, 1, port);
+		}
+		foreignClient->SendPacket(StringPacket("Client B is here"));
+		foreignClient->UpdateClient();
+	}
+	
+	world->UpdateWorld(updater);
+	renderer->Update(updater);
+	physics->Update(updater);
 
 	Debug::FlushRenderables();
 	renderer->Render();
@@ -398,7 +436,7 @@ line - after the third, they'll be able to twist under torque aswell.
 */
 
 void TutorialGame::MoveSelectedObject() {
-	renderer->DrawString("Click Force:" + std::to_string(forceMagnitude), Vector2(10, 20));
+	//renderer->DrawString("Click Force:" + std::to_string(forceMagnitude), Vector2(10, 20));
 	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 100.0f;
 
 	if (!selectionObject)
@@ -436,7 +474,6 @@ void TutorialGame::InitWorld() {
 	GameObject* lake = AddLakeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
 	GameObject* Island = AddIslandToWorld();
 
-	
 	InitGate();
 	InitBridge();
 	InitBoundaries();
@@ -632,12 +669,12 @@ GameObject* TutorialGame::AddLakeToWorld(const Vector3& position, Vector3 dimens
 GameObject* TutorialGame::AddIslandToWorld() {
 	GameObject* cube = new GameObject("Island");
 
-	AABBVolume* volume = new AABBVolume(Vector3(50, 3, 20));
+	AABBVolume* volume = new AABBVolume(Vector3(50, 2, 20));
 
 	cube->SetBoundingVolume((CollisionVolume*)volume);
 
 	cube->GetTransform().SetWorldPosition(Vector3(-300, -2, 0));
-	cube->GetTransform().SetWorldScale(Vector3(50, 3, 20));
+	cube->GetTransform().SetWorldScale(Vector3(50, 2, 20));
 
 	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
 	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));

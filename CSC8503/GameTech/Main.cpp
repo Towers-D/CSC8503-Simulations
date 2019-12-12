@@ -67,15 +67,15 @@ protected:
 
 void TestNetworking() {
 	NetworkBase::Initialise();
-	TestPacketReciever serverReceiver("Server");
-	TestPacketReciever clientreceiver("Client");
+	//TestPacketReciever serverReceiver("Server");
+	// clientreceiver("Client");
 
 	int port = NetworkBase::GetDefaultPort();
 	GameServer* server = new GameServer(port, 1);
 	GameClient* client = new GameClient();
 
-	server->RegisterPacketHandler(String_Message, &serverReceiver);
-	client->RegisterPacketHandler(String_Message, &clientreceiver);
+	//server->RegisterPacketHandler(String_Message, &serverReceiver);
+	//client->RegisterPacketHandler(String_Message, &clientreceiver);
 
 	bool canConnect = client->Connect(127, 0, 0, 1, port);
 
@@ -146,9 +146,7 @@ int main() {
 		return -1;
 	}	
 
-	TestStateMachine();
-	TestNetworking();
-	std::vector<Vector4> grid = TestPathfinding();
+	//TestNetworking();
 	
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
@@ -168,8 +166,6 @@ int main() {
 		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NEXT)) {
 			w->ShowConsole(false);
 		}
-		DisplayNodes(grid);
-		DisplayPathfinding();
 
 		//w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 		w->SetTitle("FPS: " + std::to_string((int) ((1/dt))));

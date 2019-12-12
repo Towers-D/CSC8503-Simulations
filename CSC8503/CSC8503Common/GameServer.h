@@ -24,6 +24,8 @@ namespace NCL {
 
 			virtual void UpdateServer();
 
+			int getClientCount() { return clientCount; };
+
 		protected:
 			int			port;
 			int			clientMax;
