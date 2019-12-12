@@ -18,7 +18,7 @@ namespace NCL {
 	namespace CSC8503 {
 		class TutorialGame		{
 		public:
-			TutorialGame();
+			TutorialGame(int width, int height);
 			~TutorialGame();
 
 			virtual void UpdateGame(float dt);
@@ -80,6 +80,9 @@ namespace NCL {
 			float	forceMagnitude;
 			float	timeRemaining = 180;
 			float	gameTime = 0;
+
+			int screenWidth;
+			int screenHeight;
 
 			GameObject* selectionObject = nullptr;
 

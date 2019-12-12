@@ -4,7 +4,10 @@
 using namespace NCL;
 using namespace CSC8503;
 
-TutorialGame::TutorialGame()	{
+TutorialGame::TutorialGame(int width, int height)	{
+	screenHeight = height;
+	screenWidth = width;
+
 	world		= new GameWorld();
 	renderer	= new GameTechRenderer(*world);
 	physics		= new PhysicsSystem(*world);
@@ -276,11 +279,23 @@ void TutorialGame::DebugObjectMovement() {
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::MINUS)) {
 			selectionObject->GetTransform().SetWorldPosition(selectionObject->GetTransform().GetWorldPosition() - Vector3(0, 1, 0));
 		}
-		Debug::Print("Object: " + selectionObject->GetName(), Vector2(50, 500), Vector4(0, 1, 0, 1));
+		//Object Name
+		Debug::Print("Object: " + selectionObject->GetName(), Vector2(20, screenHeight - 50), Vector4(0, 1, 0, 1));
 
+		//Object Position
 		Vector3 position = selectionObject->GetTransform().GetWorldPosition();
 		string posString = "Position: (" + std::to_string(round(position.x * 100)/100).substr(0, 6) + ", " + std::to_string(round(position.y*100)/100).substr(0, 6) + ", " + std::to_string(round(position.z*100)/100).substr(0, 6) + ")";
-		Debug::Print(posString, Vector2(50, 475), Vector4(0, 1, 0, 1));
+		Debug::Print(posString, Vector2(20, screenHeight - 75), Vector4(0, 1, 0, 1));
+
+		//Object Orientation
+		Quaternion q = selectionObject->GetTransform().GetLocalOrientation();
+		Vector3 Euler = q.ToEuler();
+		Debug::Print("Orientation: (" + std::to_string(Euler.x).substr(0, 6) + ", " + std::to_string(Euler.y).substr(0, 6) + ", " + std::to_string(Euler.z).substr(0, 6) + ")", Vector2(20, screenHeight - 100), Vector4(0, 1, 0, 1));
+
+
+		//Object State
+		if (Enemy * E = dynamic_cast<Enemy*>(selectionObject))
+			Debug::Print("State: " + E->getState(), Vector2(20, screenHeight - 125), Vector4(0, 1, 0, 1));
 	}
 }
 
@@ -560,8 +575,11 @@ GameObject* TutorialGame::AddOBBCubeToWorld(const Vector3& position, Vector3 dim
 GameObject* TutorialGame::AddLakeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
 	GameObject* cube = new GameObject("Lake");
 
-	AABBVolume* volume = new AABBVolume(dimensions);
+	//Allows the goose to sink into the lake
+	Vector3 dims = dimensions;
+	dims.y -= 0.5;
 
+	AABBVolume* volume = new AABBVolume(dims);
 	cube->SetBoundingVolume((CollisionVolume*)volume);
 
 	cube->GetTransform().SetWorldPosition(position);

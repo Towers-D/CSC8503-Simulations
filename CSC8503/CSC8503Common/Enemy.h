@@ -23,7 +23,7 @@
 			Enemy(string name, Player* player);
 			~Enemy();
 			
-			State getState() { return currentState; };
+			string getState();
 			
 			void genPath(Vector3 endPos, float time);
 

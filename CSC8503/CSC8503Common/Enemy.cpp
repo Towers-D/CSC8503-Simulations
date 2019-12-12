@@ -136,3 +136,16 @@ void Enemy::lookAt(Vector3 pos) {
 	Quaternion q = Matrix4::Rotation(deg, Vector3(0, 1, 0));
 	this->GetTransform().SetLocalOrientation(q);
 }
+
+string Enemy::getState() {
+	switch (currentState) {
+		case IDLE:
+			return "IDLE";
+		case WATCHING:
+			return "WATCHING";
+		case CHASING:
+			return "CHASING";
+		case RETURN:
+			return "RETURN";
+	}
+}
