@@ -1,7 +1,7 @@
 #pragma once
 #include <thread>
 #include <atomic>
-
+#include <vector>
 #include "NetworkBase.h"
 
 namespace NCL {
@@ -25,13 +25,15 @@ namespace NCL {
 			virtual void UpdateServer();
 
 			int getClientCount() { return clientCount; };
-
+			void incClientCount() { clientCount++; };
+			std::vector<int> playerIDs;
 		protected:
 			int			port;
 			int			clientMax;
 			int			clientCount;
 			GameWorld*	gameWorld;
 
+			
 			//std::atomic<bool> threadAlive;
 
 			

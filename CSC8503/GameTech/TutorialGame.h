@@ -30,11 +30,20 @@ namespace NCL {
 				if (type == String_Message) {
 					StringPacket* realPacket = (StringPacket*)payload;
 					string msg = realPacket->GetStringFromData();
-					std::cout << name << " recieved message: " << msg << std::endl;
+					this->msg = msg;
+				}
+				else if (type == Player_Connected) {
+					NewPlayerPacket* realPacket = (NewPlayerPacket*)payload;
+					recieved = realPacket->playerID;
 				}
 			}
+
+			string getString() { return msg; };
+			int getID() { return recieved; };
 		protected:
 			string name;
+			string msg;
+			int recieved = -1;
 		};
 
 		class TutorialGame		{
@@ -44,6 +53,8 @@ namespace NCL {
 				Single,
 				Client,
 				Server,
+				MultiS,
+				MultiC,
 				Results
 			};
 
@@ -146,11 +157,9 @@ namespace NCL {
 			//Networking
 			NetworkBase* base = nullptr;
 			GameServer* server = nullptr;
-			GameClient* localClient = nullptr;
-			GameClient* foreignClient = nullptr;
+			GameClient* client = nullptr;
 			TestPacketReciever serverReceiver = TestPacketReciever("Server");
-			TestPacketReciever locClientreceiver = TestPacketReciever("localClient");
-			TestPacketReciever forClientreceiver = TestPacketReciever("foreignClient");
+			TestPacketReciever clientReceiver = TestPacketReciever("Client");
 		};
 	}
 }

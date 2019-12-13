@@ -71,69 +71,106 @@ TutorialGame::~TutorialGame()	{
 
 void TutorialGame::UpdateGame(float dt) {
 	float updater = 0;
-	if (currState == Menu) {
-		updateMenu();
-	}
-	else if (currState == Results) {
+	switch (currState) {
+		case Menu:
+			updateMenu();
+			break;
+		case Results:
+			break;
+		case Single:
+			updater = dt;
+			gameTime += dt;
+			timeRemaining -= dt;
+			float minutes = (timeRemaining / 60);
+			int seconds = (minutes - (int)minutes) * 60;
+			Debug::Print("Time Remaining: " + std::to_string((int)minutes) + ":" + ((seconds < 10) ? "0" : "") + std::to_string(seconds), Vector2(300, 650), Vector4(1, 0.5, 0, 1));
+			if (!inSelectionMode) {
+				world->GetMainCamera()->UpdateCamera(dt);
+			}
+			if (lockedObject != nullptr) {
+				LockedCameraMovement();
+			}
+			UpdateKeys();
+			if (this->playing != true) {
+				world->GetMainCamera()->swapCam();
+				this->playing = true;
+			}
+			Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2((screenWidth/2) - 250, screenHeight - 50));
+			SelectObject();
+			MoveSelectedObject();
+			chaser->UpdateState(gameTime);
+			break;
+		case Server:
+			if (server == nullptr) {
+				player->GetRenderObject()->SetColour(Vector4(0.1, 0, 0, 1));
+				player2 = AddGooseToWorld(Vector3(-310, 2, 0));
+				player2->GetRenderObject()->SetColour(Vector4(0, 0, 0.1, 1));
+				NetworkBase::Initialise();
+				int port = NetworkBase::GetDefaultPort();
+			
+				server = new GameServer(port, 2);
+				server->RegisterPacketHandler(String_Message, &serverReceiver);
+				server->RegisterPacketHandler(Player_Connected, &serverReceiver);
+			
+				client = new GameClient();
+				client->RegisterPacketHandler(String_Message, &clientReceiver);
+				bool con = client->Connect(127, 0, 0, 1, port);
+			}
+			if (server->getClientCount() < 1) {
+				client->SendPacket(NewPlayerPacket(1));
+				client->UpdateClient();
+			}
+			if (server->getClientCount() < 2) {
+				Debug::Print("Waiting for players", Vector2(50, 300));
+				server->UpdateServer();
+				int newId = serverReceiver.getID();
+				auto result = std::find(server->playerIDs.begin(), server->playerIDs.end(), newId);
+				if (server->playerIDs.end() == result) {
+					server->incClientCount();
+					server->playerIDs.push_back(newId);
+				}
+			}
 
-	}
-	else if (currState == Single) {
-		updater = dt;
-		gameTime += dt;
-		timeRemaining -= dt;
-		float minutes = (timeRemaining / 60);
-		int seconds = (minutes - (int)minutes) * 60;
-		Debug::Print("Time Remaining: " + std::to_string((int)minutes) + ":" + ((seconds < 10) ? "0" : "") + std::to_string(seconds), Vector2(300, 650), Vector4(1, 0.5, 0, 1));
-		if (!inSelectionMode) {
-			world->GetMainCamera()->UpdateCamera(dt);
-		}
-		if (lockedObject != nullptr) {
-			LockedCameraMovement();
-		}
-		UpdateKeys();
-		Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2((screenWidth/2) - 250, screenHeight - 50));
-		SelectObject();
-		MoveSelectedObject();
-		chaser->UpdateState(gameTime);
-	}
-	else if (currState == Server) {
-		NetworkBase::Initialise();
-		serverReceiver = TestPacketReciever("Server");
-		locClientreceiver = TestPacketReciever("Client1");
-		
-		int port = NetworkBase::GetDefaultPort();
-		if (server == nullptr) {
-			server = new GameServer(port, 2);
-			server->RegisterPacketHandler(String_Message, &serverReceiver);
-		}
-		if (localClient == nullptr) {
-			localClient = new GameClient();
-			localClient->RegisterPacketHandler(String_Message, &locClientreceiver);
-			bool con = localClient->Connect(127, 0, 0, 1, port);
-		}	
-		server->SendGlobalPacket(StringPacket("is Everyone here? "));
-		localClient->SendPacket(StringPacket("Client A is here"));
-		
-		if (server->getClientCount() == 2) {
-			server->SendGlobalPacket(StringPacket("Everyone is here"));
-		}
-		else {
-			server->SendGlobalPacket(StringPacket("Waiting for more players"));
-		}
-		server->UpdateServer();
-		localClient->UpdateClient();
-	}
-	else if (currState == Client) {
-		NetworkBase::Initialise();
-		locClientreceiver = TestPacketReciever("Client2");
-		int port = NetworkBase::GetDefaultPort();
-		if (foreignClient == nullptr) {
-			foreignClient = new GameClient();
-			foreignClient->RegisterPacketHandler(String_Message, &forClientreceiver);
-			bool con = foreignClient->Connect(127, 0, 0, 1, port);
-		}
-		foreignClient->SendPacket(StringPacket("Client B is here"));
-		foreignClient->UpdateClient();
+			if (server->getClientCount() == 2) {
+				server->SendGlobalPacket(StringPacket("Start"));
+				server->UpdateServer();
+				client->UpdateClient();
+				if (clientReceiver.getString() == "Start")
+					currState = MultiS;
+			}
+			break;
+
+		case Client:
+			NetworkBase::Initialise();
+			clientReceiver = TestPacketReciever("Client2");
+			int port = NetworkBase::GetDefaultPort();
+			if (client == nullptr) {
+				client = new GameClient();
+				client->RegisterPacketHandler(String_Message, &clientReceiver);
+				bool con = client->Connect(127, 0, 0, 1, port);
+			}
+			client->SendPacket(NewPlayerPacket(2));
+			client->UpdateClient();
+			break;
+
+		case MultiC:
+			updater = dt;
+			gameTime += dt;
+			timeRemaining -= dt;
+			if (!inSelectionMode) {
+				world->GetMainCamera()->UpdateCamera(dt);
+			}
+			UpdateKeys();
+			if (this->playing != true) {
+				world->GetMainCamera()->swapCam();
+				this->playing = true;
+			}
+			Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 25), Vector4(1,0,0,1));
+			Debug::Print("Player2 Score: " + std::to_string(player2->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 50), Vector4(0,1,1,1));
+			SelectObject();
+			MoveSelectedObject();
+			chaser->UpdateState(gameTime);
+			break;
 	}
 	
 	world->UpdateWorld(updater);
