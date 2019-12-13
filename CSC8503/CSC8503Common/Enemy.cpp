@@ -110,7 +110,6 @@ void Enemy::genPath(Vector3 endPos, float time) {
 				Vector3 b = nodeList[i];
 				a.y += 5;
 				b.y += 5;
-				Debug::DrawLine(a, b, Vector4(0, 1, 0, 1));
 			}
 		}
 	}

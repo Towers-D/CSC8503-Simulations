@@ -21,9 +21,13 @@ namespace NCL {
 
 			static void setPoints(int i) { pointsToCollect = i; };
 			static int retrievePoints() { return pointsToCollect; };
+
+			void setRemove() { toRemove = true; };
+			bool isRemovable() { return toRemove; };
 		private:
 			int points;
 			bool collectable = true;
+			bool toRemove = false;
 			bool bonus;
 			float startingInMass = 0;
 

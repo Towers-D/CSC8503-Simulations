@@ -1,4 +1,7 @@
 #include "TutorialGame.h"
+#include <fstream>
+#include <iostream>
+#include <algorithm>
 
 
 using namespace NCL;
@@ -52,6 +55,15 @@ void TutorialGame::InitialiseAssets() {
 
 	InitCamera();
 	InitWorld();
+
+	std::ifstream scores;
+	scores.open("../../Assets/Data/scores.txt");
+	string buff = "";
+	while (scores >> buff) {
+		fileScores += buff + ",";
+	}
+	fileScores += std::to_string(player->getScore());
+	scores.close();
 }
 
 TutorialGame::~TutorialGame()	{
@@ -78,6 +90,7 @@ void TutorialGame::UpdateGame(float dt) {
 			updateMenu();
 			break;
 		case Results:
+			showResults(dt);
 			break;
 		case Single:
 			runSingle(dt);
@@ -98,6 +111,86 @@ void TutorialGame::UpdateGame(float dt) {
 	}
 }
 
+void TutorialGame::showResults(float dt) {
+	gameTime += dt;
+	Debug::Print("Game Over!", Vector2(screenWidth/2 - 100, screenHeight/2 + 25));
+	Debug::Print("You Scored: " + std::to_string(player->getScore()), Vector2(screenWidth/2 - 110, screenHeight/2));
+	if (client != nullptr) {
+		Debug::Print("Your opponent Scored: " + std::to_string(player->getScore()), Vector2(screenWidth / 2 - 200, screenHeight / 2 - 25));
+		string scoreString = std::to_string(clientID);
+		if (!sentScores) {
+			scoreString += fileScores + std::to_string(player->getScore());
+			client->SendPacket(StringPacket(scoreString));
+			client->UpdateClient();
+			sentScores = true;
+		}
+		else {
+			client->UpdateClient();
+			if (clientReceiver.getString() != "Start") {
+				string newScores = clientReceiver.getString();
+				std::ofstream scores;
+				scores.open("../../Assets/Data/scores.txt");
+				scores << newScores << std::endl;
+				scores.close();
+			}
+		}
+	}
+	if (server != nullptr) {
+		server->UpdateServer();
+		string gotScores = serverReceiver.getString();
+		int id = std::stoi(gotScores.substr(0, 1));
+		gotScores = gotScores.substr(9, gotScores.size() - 1);
+		if (id == 1 && !got1) {
+			for (int i = 0; i < gotScores.size() && gotScores.size() > 0;) {
+				int pos = gotScores.find(",");
+				if (pos != -1) {
+					scoreVec.push_back(std::stoi(gotScores.substr(i, pos)));
+					gotScores = gotScores.substr(pos + 1, gotScores.size() - 1);
+				}
+				else {
+					scoreVec.push_back(std::stoi(gotScores.substr(0, 1)));
+					gotScores = "";
+				}
+			}
+			got1 = true;
+		}
+		else if (id == 2 && !got2) {
+			for (int i = 0; i < gotScores.size() && gotScores.size() > 0;) {
+				int pos = gotScores.find(",");
+				if (pos != -1) {
+					scoreVec.push_back(std::stoi(gotScores.substr(i, pos)));
+					gotScores = gotScores.substr(pos + 1, gotScores.size() - 1);
+				} else {
+					scoreVec.push_back(std::stoi(gotScores.substr(0, 1)));
+					gotScores = "";
+				}
+			}
+			got2 = true;
+		}
+		else if (!finalScores){
+			std::sort(scoreVec.begin(), scoreVec.end(), std::greater<int>());
+			outScores = "Scores:\n";
+			for (auto i = scoreVec.begin(); i != scoreVec.end(); i++) {
+				outScores += std::to_string(*i) + "\n";
+			}
+			server->SendGlobalPacket(StringPacket(outScores));
+			server->UpdateServer();
+			finalScores = true;
+		}
+	}
+
+	world->UpdateWorld(0);
+	renderer->Update(0);
+	physics->Update(0);
+
+	Debug::FlushRenderables();
+	renderer->Render();
+	if (gameTime > 10) {
+		gameTime = 0;
+		currState = Menu;
+	}
+}
+
 void TutorialGame::runSingle(float dt) {
 	gameTime += dt;
 	timeRemaining -= dt;
@@ -111,10 +204,6 @@ void TutorialGame::runSingle(float dt) {
 		LockedCameraMovement();
 	}
 	UpdateKeys();
-	if (this->playing != true) {
-		world->GetMainCamera()->swapCam();
-		this->playing = true;
-	}
 	Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 50));
 	SelectObject();
 	MoveSelectedObject();
@@ -125,6 +214,15 @@ void TutorialGame::runSingle(float dt) {
 
 	Debug::FlushRenderables();
 	renderer->Render();
+	for (auto i = collectables.begin(); i != collectables.end(); i++) {
+		if ((*i)->isRemovable()) {
+			collectables.erase(std::remove(collectables.begin(), collectables.end(), *i));
+		}
+	}
+	if (collectables.size() < 0 || (minutes < 0 && seconds < 0)) {
+		currState = Results;
+		gameTime = 0;
+	}
 }
 
 void TutorialGame::startServer(){
@@ -171,10 +269,10 @@ void TutorialGame::startServer(){
 	world->UpdateWorld(0);
 	renderer->Update(0);
 	physics->Update(0);
-
 	Debug::FlushRenderables();
 	renderer->Render();
 }
+
 void TutorialGame::startClient(){
 	NetworkBase::Initialise();
 	clientReceiver = TestPacketReciever("Client2");
@@ -214,7 +312,9 @@ void TutorialGame::playClient(float dt){
 	}
 	gameTime += dt;
 	timeRemaining -= dt;
-	networkPause += dt;
+	float minutes = (timeRemaining / 60);
+	int seconds = (minutes - (int)minutes) * 60;
+	Debug::Print("Time Remaining: " + std::to_string((int)minutes) + ":" + ((seconds < 10) ? "0" : "") + std::to_string(seconds), Vector2(300, 650), Vector4(1, 0.5, 0, 1));
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
@@ -223,8 +323,8 @@ void TutorialGame::playClient(float dt){
 		world->GetMainCamera()->swapCam();
 		this->playing = true;
 	}
-	Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 25), Vector4(1, 0, 0, 1));
-	Debug::Print("Player2 Score: " + std::to_string(player2->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 50), Vector4(0, 1, 1, 1));
+	Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 50), Vector4(1, 0, 0, 1));
+	Debug::Print("Player2 Score: " + std::to_string(player2->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 75), Vector4(0, 1, 1, 1));
 	SelectObject();
 	MoveSelectedObject();
 	world->UpdateWorld(dt);
@@ -241,6 +341,15 @@ void TutorialGame::playClient(float dt){
 	goose.fullState = state;
 	client->SendPacket(goose);
 	client->UpdateClient();
+	for (auto i = collectables.begin(); i != collectables.end(); i++) {
+		if ((*i)->isRemovable()) {
+			collectables.erase(std::remove(collectables.begin(), collectables.end(), *i));
+		}
+	}
+	if (collectables.size() < 0 || (minutes < 0 && seconds < 0)) {
+		currState = Results;
+		gameTime = 0;
+	}
 
 	Debug::FlushRenderables();
 	renderer->Render();
@@ -279,6 +388,10 @@ void TutorialGame::updateMenu() {
 void TutorialGame::updateState() {
 	std::cout << "Here, menuPos: " << (GameState)menuPos << std::endl;
 	currState = (GameState) menuPos;
+	if (this->playing != true) {
+		world->GetMainCamera()->swapCam();
+		this->playing = true;
+	}
 }
 
 void TutorialGame::UpdateKeys() {
@@ -286,13 +399,12 @@ void TutorialGame::UpdateKeys() {
 		InitWorld(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
 	}
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::TAB)) {
+		Debug::Print(fileScores, Vector2(screenWidth / 2 - 200, screenHeight / 2 + 30));
+	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F3)) {
-		playing = !playing;
-		world->GetMainCamera()->swapCam();
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
@@ -518,6 +630,8 @@ letting you move the camera around.
 bool TutorialGame::SelectObject() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::Q)) {
 		inSelectionMode = !inSelectionMode;
+		playing = !playing;
+		world->GetMainCamera()->swapCam();
 		if (inSelectionMode) {
 			Window::GetWindow()->ShowOSPointer(true);
 			Window::GetWindow()->LockMouseToWindow(false);
@@ -604,19 +718,42 @@ void TutorialGame::InitWorld() {
 	player = AddGooseToWorld(Vector3(-300, 2, 0));
 	players.push_back(player);
 	//AddParkKeeperToWorld(Vector3(40, 5, 0));
-	chaser = AddCharacterToWorld(Vector3(45, 5, 0));
-	chaser->setUpStateMachine();
-	chasers.push_back(chaser);
-	
-	Collectable* apple = AddAppleToWorld(Vector3(35, 2, 0));
-	Collectable* bonusCube = AddBonusToWorld(Vector3(35, 2, 25), Vector3(0.5, 0.5, 0.5));
 	GameObject* lake = AddLakeToWorld(Vector3(-300, -2, 0), Vector3(200, 0.5, 50), 0);
 	GameObject* Island = AddIslandToWorld();
-
+	InitCollectables();
+	InitEnemies();
 	InitGate();
 	InitBridge();
-	InitBoundaries();
-	
+	InitBoundaries();	
+}
+
+void TutorialGame::InitCollectables() {
+	Collectable* bonusCube = AddBonusToWorld(Vector3(-131.5, 15, 0), Vector3(0.5, 0.5, 0.5));
+	collectables.push_back(bonusCube);
+	Collectable* bonusCube2 = AddBonusToWorld(Vector3(-300, 0.5, 87.5), Vector3(0.5, 0.5, 0.5));
+	collectables.push_back(bonusCube2);
+
+	Collectable* apple = AddAppleToWorld(Vector3(35, 2, 0));
+	collectables.push_back(apple);
+	Collectable* apple2 = AddAppleToWorld(Vector3(-400, 2, 30));
+	collectables.push_back(apple2);
+	Collectable* apple3 = AddAppleToWorld(Vector3(175, 2, 75));
+	collectables.push_back(apple3);
+	Collectable* apple4 = AddAppleToWorld(Vector3(35, 2, -75));
+	collectables.push_back(apple4);
+	Collectable* apple5 = AddAppleToWorld(Vector3(5, 2, 5));
+	collectables.push_back(apple5);
+}
+
+void TutorialGame::InitEnemies() {
+	chasers.push_back(AddCharacterToWorld(Vector3(45, 5, 0)));
+	chasers.push_back(AddCharacterToWorld(Vector3(-315, 2, 70)));
+	chasers.push_back(AddCharacterToWorld(Vector3(-125, 0, 55)));
+	chasers.push_back(AddCharacterToWorld(Vector3(-125, 0, -55)));
+
+	for (auto i = chasers.begin(); i != chasers.end(); i++) {
+		(*i)->setUpStateMachine();
+	}
 }
 
 void TutorialGame::InitBoundaries() {

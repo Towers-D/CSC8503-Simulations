@@ -30,8 +30,8 @@ namespace NCL {
 			void ReceivePacket(int type, GamePacket* payload, int source) {
 				if (type == String_Message) {
 					StringPacket* realPacket = (StringPacket*)payload;
-					string msg = realPacket->GetStringFromData();
-					this->msg = msg;
+					string mesg = realPacket->GetStringFromData();
+					this->msg = mesg;
 				}
 				else if (type == Player_Connected) {
 					NewPlayerPacket* realPacket = (NewPlayerPacket*)payload;
@@ -94,6 +94,7 @@ namespace NCL {
 			void startServer();
 			void startClient();
 			void playServer();
+			void showResults(float dt);
 			void playClient(float dt);
 
 			/*
@@ -114,6 +115,8 @@ namespace NCL {
 			void LockedCameraMovement();
 			void PlayerMovement();
 			void updateNetworkPlayer();
+
+			bool sentScores = false;
 
 			GameObject* AddFloorToWorld(const Vector3& position, const Vector3& dimensions);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
@@ -138,12 +141,22 @@ namespace NCL {
 			Player* player;
 			Player* player2;
 			Enemy* chaser;
+
+			string outScores = "";
+			vector<int> scoreVec;
+
+			bool got1 = false;
+			bool got2 = false;
+
 			PositionConstraint* playColl = nullptr;
 			PositionConstraint* playColl2 = nullptr;
 
 			vector<Player*> players;
 			vector<Enemy*> chasers;
-			vector<Collectable> collectables;
+			vector<Collectable*> collectables;
+
+			void InitCollectables();
+			void InitEnemies();
 
 			void updateEnemies();
 			int lastPack;
@@ -156,9 +169,11 @@ namespace NCL {
 			float	gameTime = 0;
 			float   networkPause = 0;
 
+			bool finalScores = false;
 			int screenWidth;
 			int screenHeight;
 
+			string fileScores = "";
 			GameObject* selectionObject = nullptr;
 
 			OGLMesh*	cubeMesh	= nullptr;
