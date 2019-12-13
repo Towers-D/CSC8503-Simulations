@@ -60,8 +60,8 @@ void Enemy::setUpStateMachine() {
 	GenericTransition<bool&, bool>* WtoR = new GenericTransition<bool&, bool>(GenericTransition<bool&, bool>::NotEqualsTransition, bonus, true, watching, returning);
 	GenericTransition<bool&, bool>* CtoR = new GenericTransition<bool&, bool>(GenericTransition<bool&, bool>::NotEqualsTransition, bonus, true, chasing, returning);
 	GenericTransition<bool&, bool>* RtoW = new GenericTransition<bool&, bool>(GenericTransition<bool&, bool>::EqualsTransition, bonus, true, returning, watching);
-	GenericTransition<float&, float>* WtoC = new GenericTransition<float&, float>(GenericTransition<float&, float>::LessThanTransition, distance, 30.0f, watching, chasing);
-	GenericTransition<float&, float>* CtoW = new GenericTransition<float&, float>(GenericTransition<float&, float>::GreaterThanTransition, distance, 35.0f, chasing, watching);
+	GenericTransition<float&, float>* WtoC = new GenericTransition<float&, float>(GenericTransition<float&, float>::LessThanTransition, distance, 50.0f, watching, chasing);
+	GenericTransition<float&, float>* CtoW = new GenericTransition<float&, float>(GenericTransition<float&, float>::GreaterThanTransition, distance, 60.0f, chasing, watching);
 	GenericTransition<float&, float>* RtoI = new GenericTransition<float&, float>(GenericTransition<float&, float>::LessThanTransition, startDist, 1.0f, returning, idle);
 	machine->AddTransition(ItoW);
 	machine->AddTransition(WtoR);

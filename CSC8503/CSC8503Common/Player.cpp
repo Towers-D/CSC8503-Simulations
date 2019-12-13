@@ -7,6 +7,8 @@ Player::Player(string name) {
 	this->name = name;
 	this->basicObject = false;
 	beginFunction = [this](GameObject* c) {
+		if (jumps != 2)
+			jumps = 2;
 		if (c->GetName() == "Lake") {
 			if (!this->isSwimming())
 				this->swapMoveType();

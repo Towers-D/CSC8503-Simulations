@@ -19,11 +19,13 @@ namespace NCL {
 
 			bool isSwimming() { return swimming; };
 			void swapMoveType() { swimming = !swimming; };
+			int jumps = 2;
 		private:
 			
 			Collectable* collectedItem = nullptr;
 			int score = 0;
 			bool swimming = false;
+			
 		};
 	}
 }

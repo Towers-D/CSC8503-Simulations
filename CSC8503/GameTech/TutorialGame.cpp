@@ -354,6 +354,8 @@ void TutorialGame::playClient(float dt){
 }
 
 void TutorialGame::updateMenu() {
+	if (client != nullptr)
+		NetworkBase::Destroy();
 	float inc = screenHeight / 5;
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::S) || Window::GetKeyboard()->KeyPressed(KeyboardKeys::DOWN)) {
 		menuPos++;
@@ -506,8 +508,12 @@ void TutorialGame::PlayerMovement() {
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S))
 			player->GetPhysicsObject()->AddForce(-fwdAxis * forceMul);
 	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE))
-		player->GetPhysicsObject()->AddForce(Vector3(0, 750, 0));
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)) {
+		if (player->jumps > 0) {
+			player->GetPhysicsObject()->AddForce(Vector3(0, 750, 0));
+			player->jumps--;
+		}
+	}
 
 	if (player->hasCollectable() && playColl == nullptr) {
 		playColl = new PositionConstraint(player, player->getCollected(), 3);

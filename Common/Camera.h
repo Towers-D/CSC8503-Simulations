@@ -46,7 +46,7 @@ namespace NCL {
 		void swapCam(Vector3 pos) { 
 			playerCam = !playerCam; 
 			if (playerCam) {
-				this->position = pos - Vector3(11, 0, 0);
+				this->position = Vector3(position.x, pos.y + 10, position.z);
 			}
 		};
 
