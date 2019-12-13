@@ -319,10 +319,7 @@ void TutorialGame::playClient(float dt){
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
 	UpdateKeys();
-	if (this->playing != true) {
-		world->GetMainCamera()->swapCam();
-		this->playing = true;
-	}
+
 	Debug::Print("Player Score: " + std::to_string(player->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 50), Vector4(1, 0, 0, 1));
 	Debug::Print("Player2 Score: " + std::to_string(player2->getScore()), Vector2((screenWidth / 2) - 250, screenHeight - 75), Vector4(0, 1, 1, 1));
 	SelectObject();
@@ -389,7 +386,7 @@ void TutorialGame::updateState() {
 	std::cout << "Here, menuPos: " << (GameState)menuPos << std::endl;
 	currState = (GameState) menuPos;
 	if (this->playing != true) {
-		world->GetMainCamera()->swapCam();
+		world->GetMainCamera()->swapCam(player->GetTransform().GetWorldPosition());
 		this->playing = true;
 	}
 }
@@ -631,7 +628,7 @@ bool TutorialGame::SelectObject() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::Q)) {
 		inSelectionMode = !inSelectionMode;
 		playing = !playing;
-		world->GetMainCamera()->swapCam();
+		world->GetMainCamera()->swapCam(player->GetTransform().GetWorldPosition());
 		if (inSelectionMode) {
 			Window::GetWindow()->ShowOSPointer(true);
 			Window::GetWindow()->LockMouseToWindow(false);

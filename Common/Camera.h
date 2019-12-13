@@ -43,7 +43,12 @@ namespace NCL {
 
 		void UpdateCamera(float dt);
 
-		void swapCam() { playerCam = !playerCam; };
+		void swapCam(Vector3 pos) { 
+			playerCam = !playerCam; 
+			if (playerCam) {
+				this->position = pos - Vector3(11, 0, 0);
+			}
+		};
 
 		float GetFieldOfVision() const {
 			return fov;
