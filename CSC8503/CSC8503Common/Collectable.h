@@ -12,8 +12,8 @@ namespace NCL {
 			int getPoints() { return points; };
 			bool isBonus() { return bonus; };
 
-			void swapCollectable() { collectable = false; };
 			bool isCollectable() { return collectable; };
+			void swapCollectable() { collectable = !collectable; };
 
 			void returnToStart();
 			void setStartMass(float f) {this->startingInMass = f;};

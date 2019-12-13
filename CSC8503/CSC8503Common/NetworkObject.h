@@ -24,6 +24,7 @@ namespace NCL {
 				type = Delta_State;
 				size = sizeof(DeltaPacket) - sizeof(GamePacket);
 			}
+
 		};
 
 		struct ClientPacket : public GamePacket {

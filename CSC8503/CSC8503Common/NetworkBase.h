@@ -3,6 +3,7 @@
 #include <enet/enet.h>
 #include <map>
 #include <string>
+#include "..//..//Common/Vector4.h"
 
 enum BasicNetworkMessages {
 	None,
@@ -14,7 +15,8 @@ enum BasicNetworkMessages {
 	Received_State, //received from a client, informs that its received packet n
 	Player_Connected,
 	Player_Disconnected,
-	Shutdown
+	Shutdown,
+	Vector
 };
 
 struct GamePacket {

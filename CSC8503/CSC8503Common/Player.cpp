@@ -14,6 +14,7 @@ Player::Player(string name) {
 		else if (Collectable* collectable = dynamic_cast<Collectable*>(c)) {
 			if (collectable->isCollectable()) {
 				this->setCollectable(collectable);
+				collectable->swapCollectable();
 				collectable->GetTransform().SetWorldPosition(collectable->GetTransform().GetWorldPosition() + Vector3(0, 3, 0));
 				collectable->GetPhysicsObject()->SetInverseMass(20.0f);
 			}

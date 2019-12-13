@@ -16,6 +16,7 @@
 
 #include "../CSC8503Common/GameServer.h"
 #include "../CSC8503Common/GameClient.h"
+#include "..//CSC8503Common/NetworkObject.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -34,16 +35,26 @@ namespace NCL {
 				}
 				else if (type == Player_Connected) {
 					NewPlayerPacket* realPacket = (NewPlayerPacket*)payload;
-					recieved = realPacket->playerID;
+					id = realPacket->playerID;
 				}
+				else if (type == Full_State) {
+					FullPacket* realPacket = (FullPacket*)payload;
+					id = realPacket->fullState.stateID;
+					state= realPacket->fullState;
+
+				}
+
 			}
 
 			string getString() { return msg; };
-			int getID() { return recieved; };
+			int getID() { return id; };
+			NetworkState getState() { return state; };
 		protected:
 			string name;
 			string msg;
-			int recieved = -1;
+
+			int id = -1;
+			NetworkState state;
 		};
 
 		class TutorialGame		{
@@ -75,8 +86,15 @@ namespace NCL {
 			void updateState();
 
 			int menuPos = 1;
+			int clientID = -1;
 
 			GameState currState = Menu;
+
+			void runSingle(float dt);
+			void startServer();
+			void startClient();
+			void playServer();
+			void playClient(float dt);
 
 			/*
 			These are some of the world/object creation functions I created when testing the functionality
@@ -95,6 +113,7 @@ namespace NCL {
 			void LockedObjectMovement();
 			void LockedCameraMovement();
 			void PlayerMovement();
+			void updateNetworkPlayer();
 
 			GameObject* AddFloorToWorld(const Vector3& position, const Vector3& dimensions);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
@@ -120,7 +139,14 @@ namespace NCL {
 			Player* player2;
 			Enemy* chaser;
 			PositionConstraint* playColl = nullptr;
+			PositionConstraint* playColl2 = nullptr;
 
+			vector<Player*> players;
+			vector<Enemy*> chasers;
+			vector<Collectable> collectables;
+
+			void updateEnemies();
+			int lastPack;
 			bool useGravity;
 			bool inSelectionMode;
 			bool playing = false;
@@ -128,6 +154,7 @@ namespace NCL {
 			float	forceMagnitude;
 			float	timeRemaining = 180;
 			float	gameTime = 0;
+			float   networkPause = 0;
 
 			int screenWidth;
 			int screenHeight;

@@ -20,7 +20,7 @@
 				RETURN
 			};
 
-			Enemy(string name, Player* player);
+			Enemy(string name);
 			~Enemy();
 			
 			string getState();
@@ -28,7 +28,7 @@
 			void genPath(Vector3 endPos, float time);
 
 			void setUpStateMachine();
-			void UpdateState(float time);
+			void UpdateState(float time, Player* p);
 		private:
 			State currentState = IDLE;
 			NavigationPath path;
@@ -36,7 +36,6 @@
 			void lookAt(Vector3 pos);
 			StateMachine* machine = new StateMachine();
 
-			Player* playerPointer;
 			std::vector<Vector3> nodeList;
 
 			float distance = 0;

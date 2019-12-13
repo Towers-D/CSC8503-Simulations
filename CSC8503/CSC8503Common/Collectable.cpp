@@ -17,9 +17,11 @@ void Collectable::dropped() {
 
 	beginFunction = [this](GameObject* g) {
 		if (g->GetName() == "Island") {
-			this->swapCollectable();
 			Collectable::setPoints(this->getPoints());
 			beginFunction = NULL;
+		}
+		else {
+			this->swapCollectable();
 		}
 	};
 }

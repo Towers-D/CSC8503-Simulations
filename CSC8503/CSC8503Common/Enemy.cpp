@@ -6,15 +6,15 @@ using namespace CSC8503;
 
 NavigationGrid Enemy::lake = NavigationGrid("LakeGrid.txt");
 
-Enemy::Enemy(string name, Player* player) {
+Enemy::Enemy(string name) {
 	this->name = name;
-	playerPointer = player;
 
 	beginFunction = [this](GameObject* g) {
 		if (Player * p = dynamic_cast<Player*>(g)) {
 			if (p->hasCollectable()) {
 				if (p->getCollected()->isBonus()) {
 					p->getCollected()->returnToStart();
+					p->getCollected()->swapCollectable();
 					p->getCollected()->GetPhysicsObject()->ClearForces();
 					p->getCollected()->GetPhysicsObject()->SetAngularVelocity(Vector3(0,0,0));
 					p->getCollected()->GetPhysicsObject()->SetLinearVelocity(Vector3(0,0,0));
@@ -30,12 +30,9 @@ Enemy::~Enemy() {
 }
 
 void Enemy::setUpStateMachine() {
-	distance = this->GetTransform().GetWorldPosition().DistanceBetween(playerPointer->GetTransform().GetWorldPosition());
+	distance = 100;
 	startDist = this->GetTransform().GetWorldPosition().DistanceBetweenNoY(startPos);
-	if (playerPointer->hasCollectable())
-		bonus = (playerPointer->getCollected()->isBonus());
-	else
-		bonus = false;
+	bonus = false;
 
 	StateFunc iFunc = [](void* data) {
 		*((State*)data) = IDLE;
@@ -75,25 +72,25 @@ void Enemy::setUpStateMachine() {
 	machine->AddTransition(RtoI);
 }
 
-void Enemy::UpdateState(float time) {
-	distance = this->GetTransform().GetWorldPosition().DistanceBetween(playerPointer->GetTransform().GetWorldPosition());
+void Enemy::UpdateState(float time, Player* p) {
+	distance = this->GetTransform().GetWorldPosition().DistanceBetween(p->GetTransform().GetWorldPosition());
 	startDist = this->GetTransform().GetWorldPosition().DistanceBetweenNoY(startPos);
-	
-	if (playerPointer->hasCollectable())
-		bonus = (playerPointer->getCollected()->isBonus());
+
+	if (p->hasCollectable())
+		bonus = (p->getCollected()->isBonus());
 	else
 		bonus = false;
 	machine->Update();
 
 	switch (currentState) {
 		case CHASING:
-			genPath(playerPointer->GetTransform().GetWorldPosition(), time);
+			genPath(p->GetTransform().GetWorldPosition(), time);
 			break;
 		case RETURN:
 			genPath(startPos, time);
 			break;
 		case WATCHING:
-			lookAt(playerPointer->GetTransform().GetWorldPosition());
+			lookAt(p->GetTransform().GetWorldPosition());
 	}
 }
 
@@ -103,7 +100,7 @@ void Enemy::genPath(Vector3 endPos, float time) {
 		nodeList.clear();
 		path.Clear();
 		lookAt(endPos);
-		if (lake.getClosestNodeType(playerPointer->GetTransform().GetWorldPosition()) == '.' || currentState == RETURN) {
+		if (lake.getClosestNodeType(endPos) == '.' || currentState == RETURN) {
 			bool found = lake.FindPath(this->GetTransform().GetWorldPosition(), endPos, this->path);
 			Vector3 pos;
 			while (this->path.PopWaypoint(pos))

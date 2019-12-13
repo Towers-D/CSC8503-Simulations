@@ -148,7 +148,7 @@ int main() {
 
 	//TestNetworking();
 	
-	w->ShowOSPointer(false);
+	w->ShowOSPointer(true);
 	w->LockMouseToWindow(true);
 
 	TutorialGame* g = new TutorialGame(w->GetScreenSize().x, w->GetScreenSize().y);
