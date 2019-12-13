@@ -83,7 +83,7 @@ TutorialGame::~TutorialGame()	{
 	delete playColl2;
 }
 
-void TutorialGame::UpdateGame(float dt) {
+bool TutorialGame::UpdateGame(float dt) {
 	float updater = 0;
 	switch (currState) {
 		case Menu:
@@ -109,6 +109,7 @@ void TutorialGame::UpdateGame(float dt) {
 			playClient(dt);
 			break;
 	}
+	return exit;
 }
 
 void TutorialGame::showResults(float dt) {
@@ -383,7 +384,9 @@ void TutorialGame::updateMenu() {
 }
 
 void TutorialGame::updateState() {
-	std::cout << "Here, menuPos: " << (GameState)menuPos << std::endl;
+	if (menuPos == 0) {
+		exit = true;
+	}
 	currState = (GameState) menuPos;
 	if (this->playing != true) {
 		world->GetMainCamera()->swapCam(player->GetTransform().GetWorldPosition());

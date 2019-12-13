@@ -10,7 +10,6 @@
 #include "../CSC8503Common/NavigationGrid.h"
 
 #include "TutorialGame.h"
-#include "NetworkedGame.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -152,8 +151,8 @@ int main() {
 	w->LockMouseToWindow(true);
 
 	TutorialGame* g = new TutorialGame(w->GetScreenSize().x, w->GetScreenSize().y);
-
-	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
+	bool exit = false;
+	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE) && !exit) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
 
 		if (dt > 1.0f) {
@@ -169,7 +168,7 @@ int main() {
 
 		//w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 		w->SetTitle("FPS: " + std::to_string((int) ((1/dt))));
-		g->UpdateGame(dt);
+		exit = g->UpdateGame(dt);
 	}
 	Window::DestroyGameWindow();
 }

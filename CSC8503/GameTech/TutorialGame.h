@@ -73,7 +73,7 @@ namespace NCL {
 			TutorialGame(int width, int height);
 			~TutorialGame();
 
-			virtual void UpdateGame(float dt);
+			virtual bool UpdateGame(float dt);
 
 		protected:
 			void InitialiseAssets();
@@ -85,6 +85,7 @@ namespace NCL {
 			void updateMenu();
 			void updateState();
 
+			bool exit = false;
 			int menuPos = 1;
 			int clientID = -1;
 
